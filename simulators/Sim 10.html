@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>IARC 2D Simulation</title>
+  <!-- Google Fonts -->
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+  <!-- CSS  -->
+  <link rel="stylesheet" href="../stylesheets/turretcss.min.css">
+  <link rel="stylesheet" href="../stylesheets/base.css">
+
+<body>
+
+  <div class="flex-container page column">
+
+    <div class="centered" style="max-width: 75%;">
+
+
+      <h1 style="margin-top: 2rem;">IARC Mission 7 2D Simulator</h1>
+
+
+      <canvas id="simulation_canvas" width="200" height="100" style="border:1px solid #d3d3d3;">
+        <h1>Your browser does not support the HTML5 canvas tag.</h1>
+      </canvas>
+
+      <div class="card" style="margin-bottom: 50px;">
+        <button type="button" onclick="GenerateMatch()">Generate Match</button>
+        <button type="button" onclick="PlayMatch()">&#9658;</button>
+        <button type="button" onclick="PauseMatch()">&#10074;&#10074;</button>
+        <button type="button" onclick="PlayMatch2()">&#9658; 2x</button>
+        <button type="button" onclick="PlayMatch4()">&#9658; 4x</button>
+        <button type="button" onclick="PlayMatch10()">&#9658; 10x</button>
+        <input type="range" id="FramePosition" onchange="SetCurrentFrame()" oninput="SetCurrentFrame()" value="0" style="width:100%;">
+        <script></script>
+        <p>Time: <span id="ShowPosition">0</span> (minutes)</p>
+        <p id="SingleMatchScore">No Score</p>
+
+        <p style="text-align: left">Scoring Key</p>
+
+        <ul style="text-align: left">
+          <li>An initial credit to all teams to make scores
+positive: 12000</li>
+          <li>Number of robots scored across green line * 2000</li>
+          <li>Number of robots not scored * -1000</li>
+          <li>Number of minutes used in match * -100</li>
+        </ul>
+
+
+    </div>
+
+
+    </div>
+
+  </div>
+
+  <table>
+    <tr>
+      <td style="display: none; padding-left: 5px; border: #d0d0d0 1px solid; vertical-align: top;" id="MultiMatchDiv">
+        <h2>Run Multiple Matches</h2>
+        <p>Repeat <input type="text" id="RepeatNumber" value="10"> Times</p>
+        <button type="button" onclick="GenerateMatches()">Generate Matches</button>
+        <p id="CurrentMatch">Not Running</p>
+        <p id="MultiMatchScoring">No Matches to score</p>
+        <div style="overflow: scroll; height: 300px;">
+          <table id="ScoringTable">
+            <tr style="overflow: scroll;">
+              <th>Robots Scored</th>
+              <th>Time Used</th>
+            </tr>
+          </table>
+        </div>
+      </td>
+      <td style="border: #d0d0d0 1px solid; vertical-align: top; display:none;">
+        <h2 style="vertical-align: top;">Scoring Key</h2>
+        <p>V1 = Number of robots scored across green line<br>
+          V2 = Number of robots not scored<br>
+          V3 = Number of minutes used in match<br>
+          Key: Score = 12000 + (V1 * 2000) + (V2 * -1000) + (V3 * -100)
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="footer">
+    Missouri University of Science and Technology &copy; 
+    
+    <script type="text/javascript">
+      document.write(new Date().getFullYear());
+    </script>
+    
+  </div>
+
+    <!-- JS  -->
+  <script src="2d_simulator.js"></script>
+
+</body>
+</html>
