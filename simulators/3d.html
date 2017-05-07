@@ -1,0 +1,1210 @@
+
+<!DOCTYPE html>
+<html>
+    <meta charset=utf-8>
+    
+<!-- TW is trying to make this human-playable -->
+    
+<link rel="stylesheet" href="turretcss.min.css">
+<link rel="stylesheet" href="base.css">
+    
+<body border="0px">
+
+<table>
+<tr>
+<td>
+<!--
+<canvas id="myCanvas" width="200" height="100" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+-->
+</td>
+<td id="helptext">
+    
+Use the arrow keys to move, [Ctrl] and [Shift] to go up and down, and "," and "." to rotate.
+<br>
+<input type="checkbox" id="inertiaCheckbox">Enable Inertia<br>
+<!-- <input type="checkbox" id="limitCheckbox">Limit View -->
+    
+</td>
+<td style="border: 1px solid black;">
+    Score: <span id="scoredisplay"></span>
+</td>
+<td id="OutOfBoundsCounter" style="color: red; font-size: 20pt; vertical-align: bottom;">
+
+</td>
+</tr>
+</table>
+
+
+<script src="three.js"></script>
+<script>
+
+function GroundRobotData()
+{
+  X=0,
+  Y=0,
+  Rotation=0,
+  Color="RED",
+  FramesToTurn = 0,
+  TurnDirection = -1,
+  TouchedOnTop = false,
+  ReadyForTopTouch = true,
+  StillIn = true
+};
+
+function ObstacleRobotData()
+{
+  X=0,
+  Y=0,
+  Rotation=0,
+  Height=0 // pixels
+};
+
+function DroneData()
+{
+  X=0,
+  Y=0,
+  Z=0,
+  Direction = -Math.PI / 2,
+  Xvelocity = 0,
+  Yvelocity = 0,
+  Zvelocity = 0,
+  OutOfBoundsTime = 0 // frames
+};
+
+function GameFrame()
+{
+  GroundRobots = {},
+  ObstacleRobots = {},
+  oho = 2,
+  Drones = {}
+}
+
+const BACKGROUNDCOLOR = "606070";
+const TAPECOLOR = "ffffff";
+const GREENTAPECOLOR = "00ff00";
+const REDTAPECOLOR = "ff0000";
+const GROUND_ROBOT_NUMBER = 10;
+const GRIDNUMBER = 20;
+const TAPECENTIWIDTH = 7;
+const GROUNDROBOTCENTIWIDTH = 35.3;
+const GROUNDROBOTCOLOR = "ffffff";
+const OBSTACLEROBOTCOLOR = "aaaaaa";
+const OBSTACLE_ROBOT_NUMBER = 4;
+const MARGINCOUNT = 2;
+const FIELDSIZE = 20;
+const FIELDMARGINSIZE = 2;
+const TO_RADIANS = 0.0174533;
+const FROM_RADIANS = 57.29580;
+const RED_COLOR = "ff0000";
+const BLUE_COLOR = "0000ff";
+const ROTATION_POINTER_LENGTH = 1;
+const OBSTACLE_ROBOT_PATH_RADIUS = 5;
+const DRONE_NUMBER = 1;
+const DRONE_SPEED = 3;
+const DRONE_ACCEL = 0.03;
+const DRONE_RESISTANCE = 0.02; // 2% per frame
+const DRONE_ROTATION_RADIANS_PER_FRAME = 0.02 * Math.PI; // 100 frames to a full 2pi rotation
+const HEIGHT_LIMIT = 3; // meters
+const DRONE_CENTI_RADIUS = 30;
+const DRONE_COLOR = "dddd00";
+const DRONE_SHADOW_COLOR = "3d390a";
+const OBSTACLE_HEIGHT_MIN = 1; // meter
+const OBSTACLE_HEIGHT_MAX = 2; // meters
+const OBSTACLE_RADIUS = 2; // pixels
+const DRONE_VERTICAL_ACCEL = 0.03;
+const ROOMBA_HEIGHT = 3; // pixel
+const DRONE_FLOOR_BOUNCE = 0.25;
+const DRONE_ROOMBA_BOUNCE = 0.5;
+const FRAME_RATE = 60;
+const GROUND_ROBOT_SPEED = 0.33;
+const MILLI_TO_TURN = 5000;
+const MILLI_PER_SEC = 1000;
+const TURN_INCREMENT_MAX = 20;
+const TURN_ROTATE_AMOUNT = 180;
+const MILLI_TO_ROTATE = 20000;
+const OBSTACLE_ROBOT_SPEED = 0.33;
+const OBSTACLE_ROBOT_FULL_CIRLE_TIME = 2 * Math.PI * OBSTACLE_ROBOT_PATH_RADIUS / OBSTACLE_ROBOT_SPEED;
+const TIME_LIMIT = 600;
+const FRAME_LIMIT = FRAME_RATE * TIME_LIMIT;
+const MILLI_PER_FRAME = MILLI_PER_SEC / FRAME_RATE;
+const GROUND_ROBOT_SECONDS_PER_360_TURN = 5;
+const TAPE_CM_WIDTH = 7;
+const TURN_TAP_AMOUNT = 45;
+const INITIAL_SCORE = 12000;
+const SCORED_ROBOT_VALUE = 2000;
+const UNSCORED_ROBOT_VALUE = -1000;
+const MINUTE_LOST_VALUE = -100;
+const OUT_OF_BOUNDS_SECONDS_LIMIT = 5;
+
+// 3d view
+const VIEW_WIDTH = 1024;
+const VIEW_HEIGHT = 640;
+
+
+var BrowserWindow = window;
+//var c = document.getElementById("myCanvas");
+
+// 2-D canvas in previous simulations, NOT 3-D canvas
+var CanvasHeight = 640;
+var CanvasWidth = 640;
+
+//c.width = CanvasHeight;
+//c.height = CanvasHeight;
+//var Canvas = c.getContext("2d");
+
+var FieldHeight = CanvasHeight - (CanvasHeight / (FIELDSIZE + (FIELDMARGINSIZE * MARGINCOUNT)) * (MARGINCOUNT * FIELDMARGINSIZE));
+var FieldWidth = FieldHeight;
+var FieldX = (CanvasWidth - FieldWidth) / 2;
+var FieldY = (CanvasHeight - FieldHeight) / 2;
+var TapeWidth = FieldHeight / (FIELDSIZE * 100) * TAPE_CM_WIDTH;
+
+var Drones = [];
+
+var DataArray = [];
+
+var NewDate = new Date();
+var Milliseconds = NewDate.getTime();
+var LastTimeOfGroundRobot5 = Milliseconds;
+var LastTimeOfGroundRobot180 = Milliseconds;
+
+var MatchQueued = false;
+var Play = false;
+var CurrentFrame = 0;
+
+
+// TW
+var UpKey = false;
+var DownKey = false;
+var RightKey = false;
+var LeftKey = false;
+var SpaceKey = false;
+var LessThanKey = false;
+var GreaterThanKey = false;
+var CtrlKey = false;
+var ShiftKey = false;
+
+// TW
+document.onkeydown = function myFunction() {
+  var code;
+  if(event.keyCode)
+  {
+    code = event.keyCode;
+  }
+  else if(event.charCode)
+  {
+    code = event.keyCode;
+  }
+  
+  switch (code) {
+    case 38:
+      UpKey = true;
+      //alert("Up key is pressed");
+      break;
+    case 40:
+      DownKey = true;
+      //alert("Down key is pressed");
+      break;
+    case 37:
+      RightKey = true;
+      //alert("Right key is pressed");
+      break;
+    case 39:
+      LeftKey = true;
+      //alert("left key is pressed");
+      break;
+    case 32:
+      SpaceKey = true;
+      //alert("space bar is pressed");
+      break;
+    case 188:
+      LessThanKey = true;
+      break;
+    case 190:
+      GreaterThanKey = true;
+      break;
+    case 16:
+      ShiftKey = true;
+      break;
+    case 17:
+      CtrlKey = true;
+      break;
+  }
+}
+
+// TW
+document.onkeyup = function myFunction() {
+  var code;
+  if(event.keyCode)
+  {
+    code = event.keyCode;
+  }
+  else if(event.charCode)
+  {
+    code = event.keyCode;
+  }
+    
+    switch (code) {
+      case 38:
+        UpKey = false;
+        //alert("Up key is released");
+        break;
+      case 40:
+        DownKey = false;
+        //alert("Down key is released");
+        break;
+      case 37:
+        RightKey = false;
+        //alert("Right key is released");
+        break;
+      case 39:
+        LeftKey = false;
+        //alert("left key is released");
+        break;
+      case 32:
+        SpaceKey = false;
+        //alert("space bar is released");
+        break;
+      case 188:
+        LessThanKey = false;
+        break;
+      case 190:
+        GreaterThanKey = false;
+        break;
+      case 16:
+        ShiftKey = false;
+        break;
+      case 17:
+        CtrlKey = false;
+        break;
+    }
+}
+
+// TW
+window.addEventListener("keydown", function(e) {
+  if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+    e.preventDefault();
+  }
+}, false);
+
+
+
+function PlayMatch()
+{
+  InitMatch(); // inserted by TW 12/14/2016
+  Play = true;
+}
+
+window.onload = function()
+{
+	setInterval(GameLoop, MILLI_PER_FRAME)
+}
+
+/*
+function GenerateMatch()
+{
+  InitMatch();
+  for(var FrameIndex = 1; FrameIndex < FRAME_LIMIT; FrameIndex++)
+  {
+    DataArray.push(new GameFrame());
+    Engine(FrameIndex);
+  }
+  alert("Done");
+  Play = false;
+  MatchQueued = true;
+  CurrentFrame = 0;
+}
+*/
+
+function GameLoop()
+{
+  if(Play == true)
+  {
+    if( CurrentFrame < FRAME_LIMIT )
+    {
+      CurrentFrame++;
+      DataArray.push(new GameFrame()); // inserted by TW 12/14/2016
+      Engine(CurrentFrame); // inserted by TW 12/14/2016
+      //Draw();
+    }
+    DisplayScore();
+    document.getElementById("FramePosition").value = CurrentFrame;
+    var seconds = CurrentFrame / FRAME_RATE;
+    seconds = seconds.toFixed( 2 );
+    document.getElementById("ShowPosition").innerHTML = seconds;
+  }
+}
+
+var LastTurnIncrementFrame = 0;
+var LastTurnRotateFrame = 0;
+var IncrementTurnDirectionArray = [];
+var GroundRobotMode = "Normal";
+var NumberOfFramesUntilModeEnd = 0;
+var SavedFrameNum = 0;
+
+var score;
+
+var PrevGroundBotData = [];
+var PrevObstacleBotData = [];
+
+function Engine(CurrentFrame)
+{
+  var GroundRobotPixelSpeed = 0;
+  var ObstacleRobotPixelSpeed = 0;
+  
+  var GroundBotFrameData = [];
+  var ObstacleBotFrameData = [];
+  
+  DataArray[CurrentFrame].GroundRobots = [];
+  DataArray[CurrentFrame].ObstacleRobots = [];
+  DataArray[CurrentFrame].Drones = [];
+  
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    DataArray[CurrentFrame].GroundRobots.push(new GroundRobotData());
+    DataArray[CurrentFrame].GroundRobots[index].Rotation = DataArray[CurrentFrame - 1].GroundRobots[index].Rotation;
+    DataArray[CurrentFrame].GroundRobots[index].X = DataArray[CurrentFrame - 1].GroundRobots[index].X;
+    DataArray[CurrentFrame].GroundRobots[index].Y = DataArray[CurrentFrame - 1].GroundRobots[index].Y;
+    DataArray[CurrentFrame].GroundRobots[index].Color = DataArray[CurrentFrame - 1].GroundRobots[index].Color;
+    DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = DataArray[CurrentFrame - 1].GroundRobots[index].FramesToTurn;
+    DataArray[CurrentFrame].GroundRobots[index].TurnDirection = DataArray[CurrentFrame - 1].GroundRobots[index].TurnDirection;
+    DataArray[CurrentFrame].GroundRobots[index].TouchedOnTop = DataArray[CurrentFrame - 1].GroundRobots[index].TouchedOnTop;
+    DataArray[CurrentFrame].GroundRobots[index].ReadyForTopTouch = DataArray[CurrentFrame - 1].GroundRobots[index].ReadyForTopTouch;
+    DataArray[CurrentFrame].GroundRobots[index].StillIn = DataArray[CurrentFrame - 1].GroundRobots[index].StillIn;
+  }
+  
+  for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+  {
+    DataArray[CurrentFrame].ObstacleRobots.push(new ObstacleRobotData());
+    DataArray[CurrentFrame].ObstacleRobots[index].Rotation = DataArray[CurrentFrame - 1].ObstacleRobots[index].Rotation;
+    DataArray[CurrentFrame].ObstacleRobots[index].X = DataArray[CurrentFrame - 1].ObstacleRobots[index].X;
+    DataArray[CurrentFrame].ObstacleRobots[index].Y = DataArray[CurrentFrame - 1].ObstacleRobots[index].Y;
+    DataArray[CurrentFrame].ObstacleRobots[index].Height = DataArray[CurrentFrame - 1].ObstacleRobots[index].Height;
+  }
+  
+  for(var index = 0; index < DRONE_NUMBER; index++)
+  {
+    DataArray[CurrentFrame].Drones.push(new DroneData());
+    DataArray[CurrentFrame].Drones[index].X = DataArray[CurrentFrame - 1].Drones[index].X;
+    DataArray[CurrentFrame].Drones[index].Y = DataArray[CurrentFrame - 1].Drones[index].Y;
+    DataArray[CurrentFrame].Drones[index].Z = DataArray[CurrentFrame - 1].Drones[index].Z;
+    DataArray[CurrentFrame].Drones[index].Direction = DataArray[CurrentFrame - 1].Drones[index].Direction;
+    DataArray[CurrentFrame].Drones[index].Xvelocity = DataArray[CurrentFrame - 1].Drones[index].Xvelocity;
+    DataArray[CurrentFrame].Drones[index].Yvelocity = DataArray[CurrentFrame - 1].Drones[index].Yvelocity;
+    DataArray[CurrentFrame].Drones[index].Zvelocity = DataArray[CurrentFrame - 1].Drones[index].Zvelocity;
+    DataArray[CurrentFrame].Drones[index].OutOfBoundsTime = DataArray[CurrentFrame - 1].Drones[index].OutOfBoundsTime;
+    
+  }
+  
+  CopyGroundBotData(CurrentFrame);
+  CopyObstacleBotData(CurrentFrame);
+  
+  
+
+
+    // TW  Arrow Key Control!!!!!
+    if ( document.getElementById("inertiaCheckbox").checked )
+    {
+      var DronePixelAccel = DRONE_ACCEL * FieldHeight / GRIDNUMBER / FRAME_RATE;
+      var theta = DataArray[CurrentFrame].Drones[0].Direction;
+      if( UpKey ) {
+        DataArray[CurrentFrame].Drones[0].Xvelocity += Math.cos( theta ) * DronePixelAccel;
+        DataArray[CurrentFrame].Drones[0].Yvelocity += Math.sin( theta ) * DronePixelAccel;
+      } if( RightKey ){
+        DataArray[CurrentFrame].Drones[0].Xvelocity += Math.cos( theta - (Math.PI / 2) ) * DronePixelAccel;
+        DataArray[CurrentFrame].Drones[0].Yvelocity += Math.sin( theta - (Math.PI / 2) ) * DronePixelAccel;
+      } if( LeftKey ) {
+        DataArray[CurrentFrame].Drones[0].Xvelocity += Math.cos( theta + (Math.PI / 2) ) * DronePixelAccel;
+        DataArray[CurrentFrame].Drones[0].Yvelocity += Math.sin( theta + (Math.PI / 2) ) * DronePixelAccel;
+      } if( DownKey ) {
+        DataArray[CurrentFrame].Drones[0].Xvelocity += Math.cos( theta + Math.PI ) * DronePixelAccel;
+        DataArray[CurrentFrame].Drones[0].Yvelocity += Math.sin( theta + Math.PI ) * DronePixelAccel;
+      } if( CtrlKey ) {
+          if( DataArray[CurrentFrame].Drones[0].Z > 0 )
+          {
+              DataArray[CurrentFrame].Drones[0].Zvelocity -= DRONE_VERTICAL_ACCEL;
+          }
+      }
+      if( ShiftKey ) {
+          if( DataArray[CurrentFrame].Drones[0].Z < (HEIGHT_LIMIT * FieldHeight / GRIDNUMBER) - (DataArray[CurrentFrame].Drones[0].Zvelocity/DRONE_VERTICAL_ACCEL) )
+          {
+              DataArray[CurrentFrame].Drones[0].Zvelocity += DRONE_VERTICAL_ACCEL;
+          }
+      }
+      
+      
+      if( DataArray[CurrentFrame].Drones[0].Z >= (HEIGHT_LIMIT * FieldHeight / GRIDNUMBER) - (DataArray[CurrentFrame].Drones[0].Zvelocity/DRONE_VERTICAL_ACCEL) )
+      {
+        DataArray[CurrentFrame].Drones[0].Zvelocity -= DRONE_VERTICAL_ACCEL;
+      }
+      
+      if( DataArray[CurrentFrame].Drones[0].Z < 0 )
+      {
+        DataArray[CurrentFrame].Drones[0].Z = 0.000001;
+        DataArray[CurrentFrame].Drones[0].Zvelocity = Math.abs( DataArray[CurrentFrame].Drones[0].Zvelocity * DRONE_FLOOR_BOUNCE );
+      }
+      
+      
+      DataArray[CurrentFrame].Drones[0].Xvelocity *= 1 - DRONE_RESISTANCE;
+      DataArray[CurrentFrame].Drones[0].Yvelocity *= 1 - DRONE_RESISTANCE;
+      DataArray[CurrentFrame].Drones[0].Zvelocity *= 1 - DRONE_RESISTANCE;
+    
+      DataArray[CurrentFrame].Drones[0].X += DataArray[CurrentFrame].Drones[0].Xvelocity;
+      DataArray[CurrentFrame].Drones[0].Y += DataArray[CurrentFrame].Drones[0].Yvelocity;
+      DataArray[CurrentFrame].Drones[0].Z += DataArray[CurrentFrame].Drones[0].Zvelocity;
+    }
+    else
+    {
+      var DronePixelSpeed = DRONE_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
+      var theta = DataArray[CurrentFrame].Drones[0].Direction;
+      if( UpKey ) {
+        DataArray[CurrentFrame].Drones[0].X += Math.cos( theta ) * DronePixelSpeed;
+        DataArray[CurrentFrame].Drones[0].Y += Math.sin( theta ) * DronePixelSpeed;
+      } if( RightKey ){
+        DataArray[CurrentFrame].Drones[0].X += Math.cos( theta - (Math.PI / 2) ) * DronePixelSpeed;
+        DataArray[CurrentFrame].Drones[0].Y += Math.sin( theta - (Math.PI / 2) ) * DronePixelSpeed;
+      } if( LeftKey ) {
+        DataArray[CurrentFrame].Drones[0].X += Math.cos( theta + (Math.PI / 2) ) * DronePixelSpeed;
+        DataArray[CurrentFrame].Drones[0].Y += Math.sin( theta + (Math.PI / 2) ) * DronePixelSpeed;
+      } if( DownKey ) {
+        DataArray[CurrentFrame].Drones[0].X += Math.cos( theta + Math.PI ) * DronePixelSpeed;
+        DataArray[CurrentFrame].Drones[0].Y += Math.sin( theta + Math.PI ) * DronePixelSpeed;
+      } if( CtrlKey ) {
+        if( DataArray[CurrentFrame].Drones[0].Z > 0 )
+        {
+          DataArray[CurrentFrame].Drones[0].Z -= DronePixelSpeed;
+        }
+        else
+        {
+          DataArray[CurrentFrame].Drones[0].Z = 0;
+        }
+      }
+      if( ShiftKey ) {
+        if( DataArray[CurrentFrame].Drones[0].Z < HEIGHT_LIMIT * FieldHeight / GRIDNUMBER )
+        {
+          DataArray[CurrentFrame].Drones[0].Z += DronePixelSpeed;
+        }
+      }
+    }
+    
+    // turning
+    if( LessThanKey )
+    {
+      DataArray[CurrentFrame].Drones[0].Direction -= DRONE_ROTATION_RADIANS_PER_FRAME;
+    }
+    else if( GreaterThanKey )
+    {
+      DataArray[CurrentFrame].Drones[0].Direction += DRONE_ROTATION_RADIANS_PER_FRAME;
+    }
+    
+    
+    for(var index2 = 0; index2 < GROUND_ROBOT_NUMBER; index2++)
+    {
+      if (
+        DataArray[CurrentFrame].Drones[0].Z <= ROOMBA_HEIGHT
+        &&
+        Math.pow( DataArray[CurrentFrame].Drones[0].X - DataArray[CurrentFrame].GroundRobots[index2].X, 2 ) +
+        Math.pow( DataArray[CurrentFrame].Drones[0].Y - DataArray[CurrentFrame].GroundRobots[index2].Y, 2 )
+        <=
+        Math.pow( ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight, 2)
+      )
+      {
+        if( DataArray[CurrentFrame].GroundRobots[index2].ReadyForTopTouch && !DataArray[CurrentFrame].GroundRobots[index2].FramesToTurn > 0 )
+        {
+          DataArray[CurrentFrame].GroundRobots[index2].TouchedOnTop = true;
+          var FramesToTurn = TURN_TAP_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+          DataArray[CurrentFrame].GroundRobots[index2].FramesToTurn = FramesToTurn;
+          DataArray[CurrentFrame].GroundRobots[index2].TurnDirection = -1;
+          DataArray[CurrentFrame].GroundRobots[index2].ReadyForTopTouch = false;
+        }
+        
+        
+        DataArray[CurrentFrame].Drones[0].Z = ROOMBA_HEIGHT;
+        DataArray[CurrentFrame].Drones[0].Zvelocity *= -DRONE_ROOMBA_BOUNCE;
+      }
+      else
+      {
+        DataArray[CurrentFrame].GroundRobots[index2].ReadyForTopTouch = true;
+      }
+    }
+    
+    
+
+    if((CurrentFrame - LastTurnRotateFrame) > MILLI_TO_ROTATE / MILLI_PER_SEC * FRAME_RATE)
+    {
+      var FramesToTurn = TURN_ROTATE_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+      LastTurnRotateFrame = FramesToTurn + CurrentFrame;
+      for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+      {
+        DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = FramesToTurn;
+        DataArray[CurrentFrame].GroundRobots[index].TurnDirection = -1;
+        LastTurnRotateFrame = FramesToTurn + CurrentFrame;
+      }
+    }
+    if(CurrentFrame > LastTurnRotateFrame && (CurrentFrame - LastTurnIncrementFrame) > MILLI_TO_TURN / MILLI_PER_SEC * FRAME_RATE)
+    {
+      LastTurnIncrementFrame = FramesToTurn + CurrentFrame;
+      for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+      {
+        if( DataArray[CurrentFrame].GroundRobots[index].FramesToTurn <= 0 )
+        {
+          var FramesToTurn = (Math.random() * TURN_INCREMENT_MAX) / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+          DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = FramesToTurn;
+          DataArray[CurrentFrame].GroundRobots[index].TurnDirection = -1;
+          LastTurnIncrementFrame = FramesToTurn + CurrentFrame;
+        }
+      }
+    }
+    
+    var AnyStillIn = false;
+    GroundRobotPixelSpeed = GROUND_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
+    for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+    {
+	  if(DataArray[CurrentFrame].GroundRobots[index].StillIn == true)
+	  {
+          AnyStillIn = true;
+          
+		  var PrevX = DataArray[CurrentFrame].GroundRobots[index].X;
+		  var PrevY = DataArray[CurrentFrame].GroundRobots[index].Y;
+		  DataArray[CurrentFrame].GroundRobots[index].X = DataArray[CurrentFrame - 1].GroundRobots[index].X + Math.sin(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * GroundRobotPixelSpeed;
+		  DataArray[CurrentFrame].GroundRobots[index].Y = DataArray[CurrentFrame - 1].GroundRobots[index].Y + Math.cos(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * GroundRobotPixelSpeed;
+		  
+		  for(var index2 = 0; index2 < GROUND_ROBOT_NUMBER; index2++)
+		  {
+			if(DataArray[CurrentFrame].GroundRobots[index2].StillIn == true)
+			{
+				if(index == index2)
+				  continue;
+				var A = DataArray[CurrentFrame].GroundRobots[index].X - DataArray[CurrentFrame].GroundRobots[index2].X;
+				var B = DataArray[CurrentFrame].GroundRobots[index].Y - DataArray[CurrentFrame].GroundRobots[index2].Y;
+				if(Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) < ((GROUNDROBOTCENTIWIDTH) / (GRIDNUMBER * 100)) * FieldHeight && DataArray[CurrentFrame].GroundRobots[index].FramesToTurn <= 0)
+				{
+				  var FramesToTurn = TURN_ROTATE_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+				  DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = FramesToTurn;
+				  DataArray[CurrentFrame].GroundRobots[index].TurnDirection = -1;
+				}
+			  }
+		  }
+		  for(var index2 = 0; index2 < OBSTACLE_ROBOT_NUMBER; index2++)
+		  {
+			var A = DataArray[CurrentFrame].GroundRobots[index].X - DataArray[CurrentFrame].ObstacleRobots[index2].X;
+			var B = DataArray[CurrentFrame].GroundRobots[index].Y - DataArray[CurrentFrame].ObstacleRobots[index2].Y;
+			if(Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) < ((GROUNDROBOTCENTIWIDTH) / (GRIDNUMBER * 100)) * FieldHeight && DataArray[CurrentFrame].GroundRobots[index].FramesToTurn <= 0)
+			{
+			  var FramesToTurn = TURN_ROTATE_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+			  DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = FramesToTurn;
+			  DataArray[CurrentFrame].GroundRobots[index].TurnDirection = -1;
+			}
+		  }
+          for(var index2 = 0; index2 < DRONE_NUMBER; index2++)
+          {
+            var A = DataArray[CurrentFrame].GroundRobots[index].X - DataArray[CurrentFrame].Drones[index2].X;
+            var B = DataArray[CurrentFrame].GroundRobots[index].Y - DataArray[CurrentFrame].Drones[index2].Y;
+            if( DataArray[CurrentFrame].Drones[index2].Z < ROOMBA_HEIGHT && Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) < (((GROUNDROBOTCENTIWIDTH/2)+(DRONE_CENTI_RADIUS/2)) / (GRIDNUMBER * 100)) * FieldHeight && Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) >= ((GROUNDROBOTCENTIWIDTH/2) / (GRIDNUMBER * 100)) * FieldHeight )
+            {
+              if( DataArray[CurrentFrame].GroundRobots[index].FramesToTurn <= 0
+                 && Math.pow(A, 2) + Math.pow(B, 2) > Math.pow(A + (Math.sin(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * GroundRobotPixelSpeed), 2) + Math.pow(B + (Math.cos(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * GroundRobotPixelSpeed), 2) )
+              {
+                var FramesToTurn = TURN_ROTATE_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
+                DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = FramesToTurn;
+                DataArray[CurrentFrame].GroundRobots[index].TurnDirection = -1;
+              }
+              DataArray[CurrentFrame].Drones[index2].X -= (A/Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2))) * (DRONE_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE) * Math.sqrt(2);
+              DataArray[CurrentFrame].Drones[index2].Y -= (B/Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2))) * (DRONE_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE) * Math.sqrt(2);
+              if( document.getElementById("inertiaCheckbox").checked && index2 == 0 )
+              {
+                DataArray[CurrentFrame].Drones[index2].Xvelocity -= (A/Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2))) * (DRONE_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE) * Math.sqrt(Math.pow(DataArray[CurrentFrame].Drones[index2].Xvelocity, 2)+Math.pow(DataArray[CurrentFrame].Drones[index2].Yvelocity, 2));
+                DataArray[CurrentFrame].Drones[index2].Yvelocity -= (B/Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2))) * (DRONE_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE) * Math.sqrt(Math.pow(DataArray[CurrentFrame].Drones[index2].Xvelocity, 2)+Math.pow(DataArray[CurrentFrame].Drones[index2].Yvelocity, 2));
+              }
+            }
+          }
+          
+          if(DataArray[CurrentFrame].GroundRobots[index].FramesToTurn > 0)
+		  {
+			DataArray[CurrentFrame].GroundRobots[index].X = PrevX;
+			DataArray[CurrentFrame].GroundRobots[index].Y = PrevY;
+			DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = DataArray[CurrentFrame].GroundRobots[index].FramesToTurn - 1;
+			DataArray[CurrentFrame].GroundRobots[index].Rotation = DataArray[CurrentFrame].GroundRobots[index].Rotation + (360 / GROUND_ROBOT_SECONDS_PER_360_TURN / FRAME_RATE) * DataArray[CurrentFrame].GroundRobots[index].TurnDirection;
+		  }
+		  else
+		  {
+			DataArray[CurrentFrame].GroundRobots[index].FramesToTurn = 0;
+		  }
+		  
+		  if(DataArray[CurrentFrame].GroundRobots[index].X <= FieldX || DataArray[CurrentFrame].GroundRobots[index].X >= FieldX + FieldWidth)
+		  {
+			DataArray[CurrentFrame].GroundRobots[index].StillIn = false;
+		  }
+		  if(DataArray[CurrentFrame].GroundRobots[index].Y <= FieldY || DataArray[CurrentFrame].GroundRobots[index].Y >= FieldY + FieldHeight)
+		  {
+			DataArray[CurrentFrame].GroundRobots[index].StillIn = false;
+		  }
+		}
+    }
+    if( !AnyStillIn )
+    {
+        Play = false;
+    }
+	
+    
+    ObstacleRobotPixelSpeed = OBSTACLE_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
+    for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+    {
+      var PrevX = DataArray[CurrentFrame].ObstacleRobots[index].X;
+      var PrevY = DataArray[CurrentFrame].ObstacleRobots[index].Y;
+      var PrevRot = DataArray[CurrentFrame].ObstacleRobots[index].Rotation;
+      DataArray[CurrentFrame].ObstacleRobots.push(new ObstacleRobotData());
+      var Rotation_Change = 360 / FRAME_RATE / OBSTACLE_ROBOT_FULL_CIRLE_TIME;
+      DataArray[CurrentFrame].ObstacleRobots[index].Rotation = DataArray[CurrentFrame - 1].ObstacleRobots[index].Rotation - Rotation_Change;
+      DataArray[CurrentFrame].ObstacleRobots[index].X = DataArray[CurrentFrame - 1].ObstacleRobots[index].X + Math.sin(DataArray[CurrentFrame].ObstacleRobots[index].Rotation * TO_RADIANS) * ObstacleRobotPixelSpeed;
+      DataArray[CurrentFrame].ObstacleRobots[index].Y = DataArray[CurrentFrame - 1].ObstacleRobots[index].Y + Math.cos(DataArray[CurrentFrame].ObstacleRobots[index].Rotation * TO_RADIANS) * ObstacleRobotPixelSpeed;
+      
+      for(var index2 = 0; index2 < GROUND_ROBOT_NUMBER; index2++)
+      {
+        var A = DataArray[CurrentFrame].ObstacleRobots[index].X - DataArray[CurrentFrame].GroundRobots[index2].X;
+        var B = DataArray[CurrentFrame].ObstacleRobots[index].Y - DataArray[CurrentFrame].GroundRobots[index2].Y;
+        if(Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) < ((GROUNDROBOTCENTIWIDTH) / (GRIDNUMBER * 100)) * FieldHeight)
+        {
+          DataArray[CurrentFrame].ObstacleRobots[index].X = PrevX;
+          DataArray[CurrentFrame].ObstacleRobots[index].Y = PrevY;
+          DataArray[CurrentFrame].ObstacleRobots[index].Rotation = PrevRot;
+        }
+      }
+      
+      for(var index2 = 0; index2 < DRONE_NUMBER; index2++ )
+      {
+        if( Math.pow( DataArray[CurrentFrame].Drones[index2].X - DataArray[CurrentFrame].ObstacleRobots[index].X, 2 ) + Math.pow( DataArray[CurrentFrame].Drones[index2].Y - DataArray[CurrentFrame].ObstacleRobots[index].Y, 2 ) < Math.pow( ( (DRONE_CENTI_RADIUS / 2 / 100 * FieldHeight / GRIDNUMBER) + OBSTACLE_RADIUS ), 2 )
+           && DataArray[CurrentFrame].Drones[index2].Z < DataArray[CurrentFrame].ObstacleRobots[index].Height )
+        {
+          Play = false;
+          document.getElementById("helptext").innerHTML = document.getElementById("helptext").innerHTML + " <br><br><span style='font-size: 20pt; color: red;'>The drone collided with an obstacle robot.  That's game over.</span>";
+        }
+        
+      }
+    }
+  
+    for( var index = 0; index < DRONE_NUMBER; index++ )
+    {
+      if(
+        DataArray[CurrentFrame].Drones[index].X < FieldX
+        || DataArray[CurrentFrame].Drones[index].Y < FieldY
+        || DataArray[CurrentFrame].Drones[index].X > FieldX + FieldWidth
+        || DataArray[CurrentFrame].Drones[index].Y > FieldY + FieldHeight
+      )
+      {
+        if( DataArray[CurrentFrame].Drones[index].OutOfBoundsTime % FRAME_RATE == 0 && index == 0 )
+        {
+            var countDown = OUT_OF_BOUNDS_SECONDS_LIMIT - Math.floor(DataArray[CurrentFrame].Drones[index].OutOfBoundsTime / FRAME_RATE);
+            document.getElementById("OutOfBoundsCounter").innerHTML = "Out of Bounds: " + countDown.toString();
+        }
+        DataArray[CurrentFrame].Drones[index].OutOfBoundsTime++;
+      }
+      else
+      {
+        DataArray[CurrentFrame].Drones[index].OutOfBoundsTime = 0;
+        if( document.getElementById("OutOfBoundsCounter").innerHTML != "" && index == 0 )
+        {
+          document.getElementById("OutOfBoundsCounter").innerHTML = "";
+        }
+      }
+      
+      if( DataArray[CurrentFrame].Drones[index].OutOfBoundsTime > FRAME_RATE * OUT_OF_BOUNDS_SECONDS_LIMIT && index == 0 )
+      {
+        Play = false;
+        document.getElementById("helptext").innerHTML = document.getElementById("helptext").innerHTML + " <br><br><span style='font-size: 20pt; color: red;'>The drone was out of the taped arena for too long (5 seconds).  That's game over.</span>";
+      }
+      
+      if(
+        DataArray[CurrentFrame].Drones[index].X < 0
+         || DataArray[CurrentFrame].Drones[index].Y < 0
+         || DataArray[CurrentFrame].Drones[index].X > CanvasWidth
+         || DataArray[CurrentFrame].Drones[index].Y > CanvasHeight
+      )
+      {
+        Play = false;
+        document.getElementById("helptext").innerHTML = document.getElementById("helptext").innerHTML + " <br><br><span style='font-size: 20pt; color: red;'>The drone went too far out of bounds.  That's game over.</span>";
+        document.getElementById("OutOfBoundsCounter").innerHTML = "";
+      }
+    }
+}
+
+function CopyGroundBotData(CurrentFrame)
+{
+  PrevGroundBotData = [];
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    PrevGroundBotData.push(DataArray[CurrentFrame].GroundRobots[index]);
+  }
+}
+
+function CopyObstacleBotData(CurrentFrame)
+{
+  PrevObstacleBotData = [];
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    PrevObstacleBotData.push(DataArray[CurrentFrame].ObstacleRobots[index]);
+  }
+}
+
+function Draw()
+{
+  DrawBackground();
+  DrawGrid();
+  DrawOutline();
+  DrawGroundBots();
+  DrawObstacleBots();
+  DrawDrones();
+}
+
+
+
+function DrawDrones()
+{
+  for(var index = 0; index < DRONE_NUMBER; index++)
+  {
+    Canvas.beginPath();
+    Canvas.arc(DataArray[CurrentFrame].Drones[index].X, DataArray[CurrentFrame].Drones[index].Y, (DRONE_CENTI_RADIUS / 2 / GRIDNUMBER) * FieldHeight / 100, 0, 2*Math.PI);
+    Canvas.fillStyle = "#" + DRONE_SHADOW_COLOR;
+    Canvas.fill();
+    Canvas.beginPath();
+    Canvas.moveTo( DataArray[CurrentFrame].Drones[index].X, DataArray[CurrentFrame].Drones[index].Y );
+    Canvas.lineTo( DataArray[CurrentFrame].Drones[index].X + ( Math.cos( DataArray[CurrentFrame].Drones[index].Direction ) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER) ), DataArray[CurrentFrame].Drones[index].Y + ( Math.sin( DataArray[CurrentFrame].Drones[index].Direction ) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER) ) );
+    Canvas.stroke();
+    Canvas.beginPath();
+    Canvas.arc(DataArray[CurrentFrame].Drones[index].X, DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].Drones[index].Z, (DRONE_CENTI_RADIUS / 2 / GRIDNUMBER) * FieldHeight / 100, 0, 2*Math.PI);
+    Canvas.fillStyle = "#" + DRONE_COLOR;
+    Canvas.fill();
+  }
+}
+
+function DrawObstacleBots()
+{
+  for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+  {
+    Canvas.beginPath();
+    Canvas.moveTo(DataArray[CurrentFrame].ObstacleRobots[index].X, DataArray[CurrentFrame].ObstacleRobots[index].Y);
+    Canvas.lineTo(DataArray[CurrentFrame].ObstacleRobots[index].X + Math.sin(DataArray[CurrentFrame].ObstacleRobots[index].Rotation * TO_RADIANS) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER), 
+      DataArray[CurrentFrame].ObstacleRobots[index].Y + Math.cos(DataArray[CurrentFrame].ObstacleRobots[index].Rotation * TO_RADIANS) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER));
+    Canvas.strokeStyle = "#" + OBSTACLEROBOTCOLOR;
+    Canvas.stroke();
+    
+    Canvas.beginPath();
+    Canvas.arc(DataArray[CurrentFrame].ObstacleRobots[index].X, DataArray[CurrentFrame].ObstacleRobots[index].Y, ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight, 0, 2*Math.PI);
+    Canvas.fillStyle = "#" + OBSTACLEROBOTCOLOR;
+    Canvas.fill();
+    
+    Canvas.beginPath();
+    Canvas.moveTo( DataArray[CurrentFrame].ObstacleRobots[index].X - OBSTACLE_RADIUS, DataArray[CurrentFrame].ObstacleRobots[index].Y );
+    Canvas.lineTo( DataArray[CurrentFrame].ObstacleRobots[index].X - OBSTACLE_RADIUS, DataArray[CurrentFrame].ObstacleRobots[index].Y - DataArray[CurrentFrame].ObstacleRobots[index].Height );
+    Canvas.lineTo( DataArray[CurrentFrame].ObstacleRobots[index].X + OBSTACLE_RADIUS, DataArray[CurrentFrame].ObstacleRobots[index].Y - DataArray[CurrentFrame].ObstacleRobots[index].Height );
+    Canvas.lineTo( DataArray[CurrentFrame].ObstacleRobots[index].X + OBSTACLE_RADIUS, DataArray[CurrentFrame].ObstacleRobots[index].Y );
+    Canvas.closePath();
+    Canvas.fillStyle = "#" + OBSTACLEROBOTCOLOR;
+    Canvas.fill();
+  }
+}
+
+function DrawGroundBots()
+{
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    Canvas.beginPath();
+    Canvas.moveTo(DataArray[CurrentFrame].GroundRobots[index].X, DataArray[CurrentFrame].GroundRobots[index].Y);
+    Canvas.lineTo(DataArray[CurrentFrame].GroundRobots[index].X + Math.sin(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER), 
+      DataArray[CurrentFrame].GroundRobots[index].Y + Math.cos(DataArray[CurrentFrame].GroundRobots[index].Rotation * TO_RADIANS) * (ROTATION_POINTER_LENGTH * FieldHeight / GRIDNUMBER));
+    Canvas.strokeStyle = "#" + ((DataArray[CurrentFrame].GroundRobots[index].Color == "RED") ? RED_COLOR : BLUE_COLOR);
+    Canvas.stroke();
+    
+    Canvas.beginPath();
+    Canvas.arc(DataArray[CurrentFrame].GroundRobots[index].X, DataArray[CurrentFrame].GroundRobots[index].Y, ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight, 0, 2*Math.PI);
+    Canvas.fillStyle = "#" + GROUNDROBOTCOLOR;
+    Canvas.fill();
+    
+    if( DataArray[CurrentFrame].GroundRobots[index].TouchedOnTop )
+    {
+        Canvas.strokeStyle = "#" + GREENTAPECOLOR;
+        Canvas.stroke();
+    }
+  }
+}
+
+function DrawGrid()
+{
+  var TapeWidth = FieldHeight / (FIELDSIZE * 100) * TAPECENTIWIDTH;
+  Canvas.beginPath();
+  
+  for(var index = 0; index < 19; index++)
+  {
+    Canvas.rect(FieldX, FieldY + (FieldHeight / GRIDNUMBER * (index + 1)), FieldWidth, TapeWidth);
+  }
+  for(var index = 0; index < 19; index++)
+  {
+    Canvas.rect(FieldX + (FieldWidth / GRIDNUMBER * (index + 1)), FieldY, TapeWidth, FieldHeight);
+  }
+  
+  Canvas.fillStyle = "#" + TAPECOLOR;
+  Canvas.fill();
+}
+
+function DrawOutline()
+{
+  var TapeWidth = FieldHeight / (FIELDSIZE * 100) * TAPECENTIWIDTH;
+  Canvas.beginPath();
+  
+  Canvas.rect(FieldX + FieldHeight - TapeWidth, FieldY, TapeWidth, FieldHeight);
+  Canvas.rect(FieldX, FieldY, TapeWidth, FieldHeight);
+  Canvas.fillStyle = "#" + TAPECOLOR;
+  Canvas.fill();
+  
+  Canvas.beginPath();
+  Canvas.rect(FieldX, FieldY + FieldHeight - TapeWidth, FieldWidth, TapeWidth);
+  Canvas.fillStyle = "#" + REDTAPECOLOR;
+  Canvas.fill();
+  
+  Canvas.beginPath();
+  Canvas.rect(FieldX, FieldY, FieldWidth, TapeWidth);
+  Canvas.fillStyle = "#" + GREENTAPECOLOR;
+  Canvas.fill();
+}
+
+function DrawBackground()
+{
+  Canvas.beginPath();
+  Canvas.fillStyle = "#" + BACKGROUNDCOLOR;
+  Canvas.rect(0, 0, CanvasWidth, CanvasHeight);
+  Canvas.fill();
+}
+
+
+function InitMatch()
+{
+  LastTurnIncrementFrame = 0;
+  LastTurnRotateFrame = 0;
+  
+  DataArray = [];
+  DataArray.push(new GameFrame());
+  DataArray[0].GroundRobots = [];
+  DataArray[0].ObstacleRobots = [];
+  DataArray[0].Drones = [];
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    DataArray[0].GroundRobots.push(new GroundRobotData());
+    var TempRotation = index * 360.0 / GROUND_ROBOT_NUMBER;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].X = FieldX + FieldWidth / 2 + Math.sin(TempRotation * TO_RADIANS) * FieldHeight / GRIDNUMBER;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].Y = FieldY + FieldHeight / 2 + Math.cos(TempRotation * TO_RADIANS) * FieldHeight / GRIDNUMBER;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].Rotation = TempRotation;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].Color = (index % 2 == 0) ? "RED" : "BLUE"; 
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].FramesToTurn = 0;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].TurnDirection = -1;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].StillIn = true;
+    DataArray[0].GroundRobots[DataArray[0].GroundRobots.length - 1].TouchedOnTop = false;
+  }
+  
+  for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+  {
+    DataArray[0].ObstacleRobots.push(new ObstacleRobotData());
+    var TempRotation = index * 360.0 / OBSTACLE_ROBOT_NUMBER;
+    DataArray[0].ObstacleRobots[DataArray[0].ObstacleRobots.length - 1].X = FieldX + FieldWidth / 2 + Math.sin(TempRotation * TO_RADIANS) * FieldHeight / GRIDNUMBER * OBSTACLE_ROBOT_PATH_RADIUS;
+    DataArray[0].ObstacleRobots[DataArray[0].ObstacleRobots.length - 1].Y = FieldY + FieldHeight / 2 + Math.cos(TempRotation * TO_RADIANS) * FieldHeight / GRIDNUMBER * OBSTACLE_ROBOT_PATH_RADIUS;
+    DataArray[0].ObstacleRobots[DataArray[0].ObstacleRobots.length - 1].Rotation = TempRotation - 90;
+    DataArray[0].ObstacleRobots[DataArray[0].ObstacleRobots.length - 1].Height = (Math.random() * (OBSTACLE_HEIGHT_MAX-OBSTACLE_HEIGHT_MIN) + OBSTACLE_HEIGHT_MIN) * (FieldHeight/GRIDNUMBER);
+  }
+  
+  for(var index = 0; index < DRONE_NUMBER; index++)
+  {
+    DataArray[0].Drones.push(new DroneData());
+    var TempRotation = index * 360.0 / OBSTACLE_ROBOT_NUMBER + 45;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].X = FieldX + FieldWidth;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Y = FieldY + FieldHeight / 2;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Z = 0;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Direction = -Math.PI / 2;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Xvelocity = 0;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Yvelocity = 0;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].Zvelocity = 0;
+    DataArray[0].Drones[DataArray[0].Drones.length - 1].OutOfBoundsTime = 0;
+  }
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    IncrementTurnDirectionArray.push(0);
+  }
+}
+
+function SetCurrentFrame()
+{
+  var Position = document.getElementById("FramePosition").value;
+  CurrentFrame = Position;
+  ShowPosition();
+}
+
+function ShowPosition()
+{
+  var Position = document.getElementById("FramePosition").value;
+  var seconds = Position / FRAME_RATE;
+  document.getElementById("ShowPosition").innerHTML = seconds.toFixed( 2 );
+}
+
+function DisplayScore()
+{
+    score = INITIAL_SCORE;
+    for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+    {
+        if( DataArray[CurrentFrame].GroundRobots[index].StillIn )
+        {
+            score += UNSCORED_ROBOT_VALUE;
+        }
+        else
+        {
+            if( DataArray[CurrentFrame].GroundRobots[index].Y <= FieldY )
+            {
+                score += SCORED_ROBOT_VALUE;
+            }
+            else
+            {
+                score += UNSCORED_ROBOT_VALUE;
+            }
+        }
+    }
+    
+    
+    score += MINUTE_LOST_VALUE * Math.floor(( CurrentFrame / FRAME_RATE ) / 60);
+    
+    
+    for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++ )
+    {
+        if( Math.pow( DataArray[CurrentFrame].Drones[0].X - DataArray[CurrentFrame].ObstacleRobots[index].X, 2 ) + Math.pow( DataArray[CurrentFrame].Drones[0].Y - DataArray[CurrentFrame].ObstacleRobots[index].Y, 2 ) < Math.pow( ( (DRONE_CENTI_RADIUS / 2 / 100 * FieldHeight / GRIDNUMBER) + OBSTACLE_RADIUS ), 2 )
+           && DataArray[CurrentFrame].Drones[0].Z < DataArray[CurrentFrame].ObstacleRobots[index].Height )
+        {
+            score = 0;
+        }
+    }
+    
+    if( DataArray[CurrentFrame].Drones[0].OutOfBoundsTime > FRAME_RATE * OUT_OF_BOUNDS_SECONDS_LIMIT )
+    {
+        score = 0;
+    }
+    
+    if(
+       DataArray[CurrentFrame].Drones[0].X < 0
+       || DataArray[CurrentFrame].Drones[0].Y < 0
+       || DataArray[CurrentFrame].Drones[0].X > CanvasWidth
+       || DataArray[CurrentFrame].Drones[0].Y > CanvasHeight
+    )
+    {
+        score = 0;
+    }
+    
+    
+    document.getElementById("scoredisplay").innerHTML = score.toString();
+}
+
+
+
+
+
+//3d code
+const DRONE_SPEED_3D = 0.1; // units per frame, (60fps)
+
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 100, VIEW_WIDTH /  VIEW_HEIGHT, 0.05, 2000 );
+
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize( VIEW_WIDTH, VIEW_HEIGHT );
+document.body.appendChild( renderer.domElement );
+
+var light = new THREE.DirectionalLight( 0xefefff, 0.5 );
+light.position.set( 1, 1, 1 ).normalize();
+scene.add( light );
+
+var light2 = new THREE.DirectionalLight( 0xefefff, 0.5 );
+light2.position.set( -1, 1, -1 ).normalize();
+scene.add( light2 );
+
+var light3 = new THREE.AmbientLight( 0xffffff, 1 );
+scene.add( light3 );
+
+
+
+
+var loader = new THREE.TextureLoader();
+
+var floor_texture = loader.load("IARC7field.png");
+
+var floor_box_material = new THREE.MeshPhysicalMaterial({ map: floor_texture });
+
+
+
+
+var material;
+
+var ground_robot_geometries = [];
+var ground_robot_cylinders = [];
+
+var obstacle_robot_geometries = [];
+var obstacle_robot_cylinders = [];
+
+var obstacle_tube_geometries = [];
+var obstacle_tube_cylinders = [];
+
+var floor_box_geometry;
+var floor_box;
+
+
+const ROOM_BOX_COUNT = 8;
+
+var room_boxes = [];
+
+var room_box_geometries = [
+  new THREE.BoxGeometry( 24 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( 24 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( 72 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( 72 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER, 72 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER, 72 * FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( 72 * FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER ),
+  new THREE.BoxGeometry( 72 * FieldHeight/GRIDNUMBER, 24 * FieldHeight/GRIDNUMBER, FieldHeight/GRIDNUMBER )
+];
+
+var room_box_meter_positions = [
+[ -12, -0.5, 12 ],
+[ 36, -0.5, 12 ],
+[ 12, -0.5, 36 ],
+[ 12, -0.5, -12 ],
+[ -24.5, 12, 12 ],
+[ 48.5, 12, 12 ],
+[ 12, 12, -24.5 ],
+[ 12, 12, 48.5 ]
+];
+
+
+var green_line_box_geometry;
+var green_line_box;
+
+
+function init3d()
+{
+  material = new THREE.MeshPhysicalMaterial( { color: 0x00ff00 } );
+  for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+  {
+    ground_robot_geometries[index] = new THREE.CylinderGeometry(
+      ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight,
+      ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight,
+      ROOMBA_HEIGHT, 64 );
+    ground_robot_cylinders[index] = new THREE.Mesh( ground_robot_geometries[index], material );
+    scene.add( ground_robot_cylinders[index] );
+  }
+    
+    
+  material = new THREE.MeshPhysicalMaterial( { color: 0xff0000 } );
+  for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+  {
+    obstacle_robot_geometries[index] = new THREE.CylinderGeometry(
+          ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight,
+          ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight,
+          ROOMBA_HEIGHT, 64 );
+    obstacle_robot_cylinders[index] = new THREE.Mesh( obstacle_robot_geometries[index], material );
+    scene.add( obstacle_robot_cylinders[index] );
+  }
+    
+    
+  material = new THREE.MeshPhysicalMaterial( { color: 0xff0000 } );
+  for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+  {
+    obstacle_tube_geometries[index] = new THREE.CylinderGeometry(
+      OBSTACLE_RADIUS,
+      OBSTACLE_RADIUS,
+      DataArray[CurrentFrame].ObstacleRobots[index].Height, 64 );
+    obstacle_tube_cylinders[index] = new THREE.Mesh( obstacle_tube_geometries[index], material );
+    scene.add( obstacle_tube_cylinders[index] );
+  }
+  
+  
+  
+  floor_box_geometry = new THREE.BoxGeometry(
+    24 * FieldHeight / GRIDNUMBER,
+    FieldHeight / GRIDNUMBER,
+    24 * FieldHeight / GRIDNUMBER
+  );
+  floor_box = new THREE.Mesh( floor_box_geometry, floor_box_material );
+  floor_box.position.x = (FieldWidth / 2) * 1.2;
+  floor_box.position.z = (FieldHeight / 2) * 1.2;
+  floor_box.position.y = -(FieldHeight / GRIDNUMBER / 2);
+  scene.add( floor_box );
+  
+  
+  room_boxes = [];
+  material = new THREE.MeshPhysicalMaterial( { color: 0xde9f17 } );
+  for( k=0; k<ROOM_BOX_COUNT; k++ )
+  {
+    room_boxes.push( new THREE.Mesh( room_box_geometries[k], material ) );
+    
+    room_boxes[k].position.x = room_box_meter_positions[k][0] * FieldHeight/GRIDNUMBER;
+    room_boxes[k].position.y = room_box_meter_positions[k][1] * FieldHeight/GRIDNUMBER;
+    room_boxes[k].position.z = room_box_meter_positions[k][2] * FieldHeight/GRIDNUMBER;
+    scene.add( room_boxes[k] );
+  }
+  
+    
+  
+  material = new THREE.MeshPhysicalMaterial( { color: 0x00ff00 } );
+  green_line_box_geometry = new THREE.BoxGeometry(
+     FieldWidth,
+     0,
+     TapeWidth
+  );
+  green_line_box = new THREE.Mesh( green_line_box_geometry, material );
+  green_line_box.position.x = FieldX + (FieldWidth/2);
+  green_line_box.position.z = FieldY;
+  green_line_box.position.y = 0.001;
+  scene.add( green_line_box );
+     
+  render();
+}
+
+
+
+
+function render() {
+    requestAnimationFrame( render );
+    camera.position.x = DataArray[CurrentFrame].Drones[0].X;
+    camera.position.y = DataArray[CurrentFrame].Drones[0].Z + 0.1;
+    camera.position.z = DataArray[CurrentFrame].Drones[0].Y;
+    camera.rotation.y = -Math.PI/2 - DataArray[CurrentFrame].Drones[0].Direction;
+    for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+    {
+      ground_robot_cylinders[index].position.x = DataArray[CurrentFrame].GroundRobots[index].X;
+      ground_robot_cylinders[index].position.z = DataArray[CurrentFrame].GroundRobots[index].Y;
+    }
+    for(var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++)
+    {
+      obstacle_robot_cylinders[index].position.x = DataArray[CurrentFrame].ObstacleRobots[index].X;
+      obstacle_robot_cylinders[index].position.z = DataArray[CurrentFrame].ObstacleRobots[index].Y;
+      obstacle_tube_cylinders[index].position.x = DataArray[CurrentFrame].ObstacleRobots[index].X;
+      obstacle_tube_cylinders[index].position.z = DataArray[CurrentFrame].ObstacleRobots[index].Y;
+      obstacle_tube_cylinders[index].position.y = DataArray[CurrentFrame].ObstacleRobots[index].Height / 2;
+    }
+    renderer.render( scene, camera );
+}
+
+
+
+</script>
+
+<table>
+<tr>
+<td>
+<button type="button" onclick="PlayMatch();init3d();">Play Match</button>
+<input type="range" id="FramePosition" onchange="SetCurrentFrame()" oninput="SetCurrentFrame()" value="0" style="width:500px;">
+<script>
+document.getElementById("FramePosition").max = FRAME_LIMIT;
+</script>
+</td>
+<td>
+<p id="ShowPosition">0</p>
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+
