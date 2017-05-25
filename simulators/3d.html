@@ -26,6 +26,9 @@ Use the arrow keys to move, [Ctrl] and [Shift] to go up and down, and "," and ".
 <!-- <input type="checkbox" id="limitCheckbox">Limit View -->
     
 </td>
+<td>
+<input type="checkbox" id="aiCheckbox">Let AI Play<br>
+</td>
 <td style="border: 1px solid black;">
     Score: <span id="scoredisplay"></span>
 </td>
@@ -69,14 +72,17 @@ function DroneData()
   Xvelocity = 0,
   Yvelocity = 0,
   Zvelocity = 0,
-  OutOfBoundsTime = 0 // frames
+  OutOfBoundsTime = 0, // frames
+  // ai stuff
+  obsClear=true,
+  OkToLeave=true
 };
 
 function GameFrame()
 {
   GroundRobots = {},
   ObstacleRobots = {},
-  oho = 2,
+  //oho = 2,
   Drones = {}
 }
 
@@ -136,10 +142,15 @@ const SCORED_ROBOT_VALUE = 2000;
 const UNSCORED_ROBOT_VALUE = -1000;
 const MINUTE_LOST_VALUE = -100;
 const OUT_OF_BOUNDS_SECONDS_LIMIT = 5;
+const OBSTACLE_CAMERA_ALERT_RADIUS = 1; // meter
+const OBSTACLE_CAMERA_VERTICAL_ANGLE = 20; // degrees
+const GROUND_ROBOT_TARGET_ROT_DEG = 180; // degrees
+const GOOD_GROUND_ROBOT_ROT_DEG_THRESHOLD = 50; // degrees from straight up
 
 // 3d view
-const VIEW_WIDTH = 1024;
-const VIEW_HEIGHT = 640;
+const VIEW_WIDTH = 1024; // pixels
+const VIEW_HEIGHT = 640; // pixels
+const VERTICAL_VIEW_DEGREES = 100; // degrees from bottom of view to top
 
 
 var BrowserWindow = window;
@@ -393,6 +404,8 @@ function Engine(CurrentFrame)
     DataArray[CurrentFrame].Drones[index].Yvelocity = DataArray[CurrentFrame - 1].Drones[index].Yvelocity;
     DataArray[CurrentFrame].Drones[index].Zvelocity = DataArray[CurrentFrame - 1].Drones[index].Zvelocity;
     DataArray[CurrentFrame].Drones[index].OutOfBoundsTime = DataArray[CurrentFrame - 1].Drones[index].OutOfBoundsTime;
+    DataArray[CurrentFrame].Drones[index].obsClear = DataArray[CurrentFrame - 1].Drones[index].obsClear;
+    DataArray[CurrentFrame].Drones[index].OkToLeave = DataArray[CurrentFrame - 1].Drones[index].OkToLeave;
     
   }
   
@@ -400,7 +413,259 @@ function Engine(CurrentFrame)
   CopyObstacleBotData(CurrentFrame);
   
   
-
+  
+    if( document.getElementById("aiCheckbox").checked )
+    {
+      var groundRobotsInSights = []; // array of ground robot objects
+      
+      var aspectRatio = VIEW_WIDTH / VIEW_HEIGHT; // ratio
+      var droneX = DataArray[CurrentFrame].Drones[0].X;
+      var droneY = DataArray[CurrentFrame].Drones[0].Y;
+      var vectorToRoomba2d = []; // 2-D vector
+      var horizontallyInView; // bool
+      var verticallyInView; // bool
+      for(var index = 0; index < GROUND_ROBOT_NUMBER; index++)
+      {
+        horizontallyInView = false;
+        verticallyInView = false;
+        vectorToRoomba2d = [ DataArray[CurrentFrame].GroundRobots[index].X - droneX, DataArray[CurrentFrame].GroundRobots[index].Y - droneY ];
+        distToRoomba = Math.sqrt( vectorToRoomba2d[0]*vectorToRoomba2d[0] + vectorToRoomba2d[1]*vectorToRoomba2d[1] );
+        
+        
+        var DirectionDifference = ( Math.atan2( DataArray[CurrentFrame].GroundRobots[index].Y - DataArray[CurrentFrame].Drones[0].Y, DataArray[CurrentFrame].GroundRobots[index].X - DataArray[CurrentFrame].Drones[0].X ) ) - DataArray[CurrentFrame].Drones[0].Direction;
+        while( DirectionDifference < -Math.PI )
+          DirectionDifference += 2 * Math.PI;
+        while( DirectionDifference > Math.PI )
+          DirectionDifference -= 2 * Math.PI;
+        
+        if( Math.abs( DirectionDifference ) < VERTICAL_VIEW_DEGREES * TO_RADIANS * aspectRatio / 2 )
+        {
+          horizontallyInView = true;
+        }
+        if( DataArray[CurrentFrame].Drones[0].Z == 0 || distToRoomba / DataArray[CurrentFrame].Drones[0].Z > 1 / Math.tan( VERTICAL_VIEW_DEGREES * TO_RADIANS / 2 )  )
+        {
+          verticallyInView = true;
+        }
+        
+        
+        
+        if( horizontallyInView && verticallyInView )
+        {
+          groundRobotsInSights.push( DataArray[CurrentFrame].GroundRobots[index] );
+          
+        }
+        
+      }
+      
+      
+      console.log( groundRobotsInSights.length );
+      
+      
+      for( var index = 0; index < OBSTACLE_ROBOT_NUMBER; index++ )
+      {
+        var dist = Math.sqrt( Math.pow( DataArray[CurrentFrame].ObstacleRobots[index].X - droneX, 2 ) + Math.pow( DataArray[CurrentFrame].ObstacleRobots[index].Y - droneY, 2 ) );
+        if( DataArray[CurrentFrame].ObstacleRobots[index].Height >= DataArray[CurrentFrame].Drones[0].Z - dist * Math.tan( OBSTACLE_CAMERA_VERTICAL_ANGLE * TO_RADIANS ) && dist < OBSTACLE_CAMERA_ALERT_RADIUS * FieldHeight / GRIDNUMBER )
+        {
+          
+          DataArray[CurrentFrame].Drones[0].obsClear = false;
+          var DirectionDifference = ( Math.atan2( DataArray[CurrentFrame].ObstacleRobots[index].Y - DataArray[CurrentFrame].Drones[0].Y, DataArray[CurrentFrame].ObstacleRobots[index].X - DataArray[CurrentFrame].Drones[0].X ) ) - DataArray[CurrentFrame].Drones[0].Direction;
+          while( DirectionDifference < -Math.PI )
+            DirectionDifference += 2 * Math.PI;
+          while( DirectionDifference > Math.PI )
+            DirectionDifference -= 2 * Math.PI;
+            
+          UpKey = false;
+          DownKey = false;
+          LeftKey = false;
+          RightKey = false;
+          if( DirectionDifference < Math.PI / 8 && DirectionDifference > -Math.PI / 8 )
+          {
+            DownKey = true;
+          }
+          else if( DirectionDifference < 3 * Math.PI / 8 && DirectionDifference >= Math.PI / 8 )
+          {
+            DownKey = true;
+            RightKey = true;
+          }
+          else if( DirectionDifference < 5 * Math.PI / 8 && DirectionDifference >= 3 * Math.PI / 8 )
+          {
+            RightKey = true;
+          }
+          else if( DirectionDifference < 7 * Math.PI / 8 && DirectionDifference >= 5 * Math.PI / 8 )
+          {
+            RightKey = true;
+            UpKey = true;
+          }
+          else if( DirectionDifference >= 7 * Math.PI / 8 || DirectionDifference <= -7 * Math.PI / 8 )
+          {
+            UpKey = true;
+          }
+          else if( DirectionDifference > -3 * Math.PI / 8 && DirectionDifference <= -Math.PI / 8 )
+          {
+            DownKey = true;
+            LeftKey = true;
+          }
+          else if( DirectionDifference > -5 * Math.PI / 8 && DirectionDifference <= -3 * Math.PI / 8 )
+          {
+            LeftKey = true;
+          }
+          else if( DirectionDifference > -7 * Math.PI / 8 && DirectionDifference <= -5 * Math.PI / 8 )
+          {
+            LeftKey = true;
+            UpKey = true;
+          }
+          
+          console.log( "OBSTACLE_CAMERA_ALERT" );
+          ShiftKey = true;
+          LessThanKey = false;
+          GreaterThanKey = false;
+          CtrlKey = false;
+        }
+        
+      }
+      
+      if( !DataArray[CurrentFrame].Drones[0].obsClear )
+      {
+        LessThanKey = false;
+        GreaterThanKey = false;
+        ShiftKey = true;
+        CtrlKey = false;
+        if(DataArray[CurrentFrame].Drones[0].Z > 2.5 * FieldHeight / GRIDNUMBER)
+          DataArray[CurrentFrame].Drones[0].obsClear = true;
+      }
+      else if( groundRobotsInSights.length == 0 )
+      {
+        LessThanKey = true;
+        GreaterThanKey = false;
+        UpKey = false;
+        DownKey = false;
+        LeftKey = false;
+        RightKey = false;
+        ShiftKey = true;
+        CtrlKey = false;
+      }
+      else
+      {
+        
+        UpKey = true;
+        DownKey = false;
+        LeftKey = false;
+        RightKey = false;
+        
+        var closestTappableRoomba;
+        var closestRoombaDistance = 1234567890;
+        for( var index = 0; index < groundRobotsInSights.length; index++ )
+        {
+          var rotDiff = groundRobotsInSights[index].Rotation - GROUND_ROBOT_TARGET_ROT_DEG;
+          while( rotDiff < -180 )
+            rotDiff += 360;
+          while( rotDiff > 180 )
+            rotDiff -= 360;
+          if( groundRobotsInSights[index].StillIn && (rotDiff < (-1) * GOOD_GROUND_ROBOT_ROT_DEG_THRESHOLD  || rotDiff > GOOD_GROUND_ROBOT_ROT_DEG_THRESHOLD) && Math.sqrt( Math.pow( droneX - groundRobotsInSights[index].X, 2 ) + Math.pow( droneY - groundRobotsInSights[index].Y, 2 ) ) < closestRoombaDistance )
+          {
+            closestTappableRoomba = groundRobotsInSights[index];
+            closestRoombaDistance = Math.sqrt( Math.pow( droneX - groundRobotsInSights[index].X, 2 ) + Math.pow( droneY - groundRobotsInSights[index].Y, 2 ) );
+          }
+        }
+        
+        
+        
+        if( closestRoombaDistance > FieldHeight / GRIDNUMBER ) // 1 meter
+        {
+          DataArray[CurrentFrame].Drones[0].OkToLeave = true;
+        }
+        else if( closestRoombaDistance < 0.5 * FieldHeight / GRIDNUMBER ) // 0.5 meters
+        {
+          DataArray[CurrentFrame].Drones[0].OkToLeave = false;
+        }
+        
+        if( closestTappableRoomba )
+        {
+          
+          var projectedTargetX = closestTappableRoomba.X;
+          var projectedTargetY = closestTappableRoomba.Y;
+          
+          GroundRobotPixelSpeed = GROUND_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
+          console.log(Math.sin(closestTappableRoomba.Rotation * TO_RADIANS) * GroundRobotPixelSpeed * closestRoombaDistance / DRONE_SPEED,Math.cos(closestTappableRoomba.Rotation * TO_RADIANS) * GroundRobotPixelSpeed * closestRoombaDistance / DRONE_SPEED);
+          projectedTargetX += 2.345 * Math.sin(closestTappableRoomba.Rotation * TO_RADIANS) * GroundRobotPixelSpeed * closestRoombaDistance / DRONE_SPEED;
+          projectedTargetY += 2.345 * Math.cos(closestTappableRoomba.Rotation * TO_RADIANS) * GroundRobotPixelSpeed * closestRoombaDistance / DRONE_SPEED;
+          var projectedTargetDistance = Math.sqrt( Math.pow( projectedTargetX - DataArray[CurrentFrame].Drones[0].X, 2 ) + Math.pow( projectedTargetY - DataArray[CurrentFrame].Drones[0].Y, 2 ) );
+        
+          if( DataArray[CurrentFrame].Drones[0].Z > projectedTargetDistance * 2 / 3  )
+          {
+            CtrlKey = true;
+            ShiftKey = false;
+          }
+          else if( DataArray[CurrentFrame].Drones[0].Z < projectedTargetDistance * 1.9 / 3 )
+          {
+            ShiftKey = true;
+            CtrlKey = false;
+          }
+          else
+          {
+            ShiftKey = false;
+            CtrlKey = false;
+          }
+          
+          if( !DataArray[CurrentFrame].Drones[0].OkToLeave && closestRoombaDistance < (GROUNDROBOTCENTIWIDTH / 2 / 100) * (FieldHeight / GRIDNUMBER) )
+          {
+            if( document.getElementById("inertiaCheckbox").checked )
+            {
+              UpKey = false;
+              DownKey = false;
+              CtrlKey = true;
+              ShiftKey = false;
+            }
+            else
+            {
+              UpKey = false;
+              DownKey = true;
+              CtrlKey = true;
+              ShiftKey = false;
+            }
+          }
+          /*
+          if( document.getElementById("inertiaCheckbox").checked && Math.sqrt( Math.pow( DataArray[CurrentFrame].Drones[0].Xvelocity, 2 ) + Math.pow( DataArray[CurrentFrame].Drones[0].Yvelocity, 2 ) ) > 0.03 * closestRoombaDistance )
+          {
+            UpKey = false;
+            //alert("!");
+          }*/
+          
+          
+          var DirectionDifference = ( Math.atan2( projectedTargetY - DataArray[CurrentFrame].Drones[0].Y, projectedTargetX - DataArray[CurrentFrame].Drones[0].X ) ) - DataArray[CurrentFrame].Drones[0].Direction;
+          while( DirectionDifference < -Math.PI )
+            DirectionDifference += 2 * Math.PI;
+          while( DirectionDifference > Math.PI )
+            DirectionDifference -= 2 * Math.PI;
+          if( DirectionDifference < -0.1 )
+          {
+            LessThanKey = true;
+            GreaterThanKey = false;
+          }
+          else if( DirectionDifference > 0.1 )
+          {
+            GreaterThanKey = true;
+            LessThanKey = false;
+          }
+          else
+          {
+            LessThanKey = false;
+            GreaterThanKey = false;
+          }
+        }
+        else
+        {
+          LessThanKey = true;
+          GreaterThanKey = false;
+          UpKey = false;
+          DownKey = false;
+          LeftKey = false;
+          RightKey = false;
+          ShiftKey = true;
+          CtrlKey = false;
+        }
+      }
+    }
 
     // TW  Arrow Key Control!!!!!
     if ( document.getElementById("inertiaCheckbox").checked )
@@ -1006,7 +1271,7 @@ const DRONE_SPEED_3D = 0.1; // units per frame, (60fps)
 
 
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 100, VIEW_WIDTH /  VIEW_HEIGHT, 0.05, 2000 );
+var camera = new THREE.PerspectiveCamera( VERTICAL_VIEW_DEGREES, VIEW_WIDTH /  VIEW_HEIGHT, 0.05, 2000 );
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( VIEW_WIDTH, VIEW_HEIGHT );
