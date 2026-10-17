@@ -54,8 +54,16 @@ uv python install 3.14
 2) Set the regulatory domain permanently (required for 5GHz mesh on channel 40):
 ```
 sudo apt install -y iw wireless-regdb
+sudo iw reg set US
 echo 'REGDOMAIN=US' | sudo tee /etc/default/crda
 sudo reboot
+```
+
+3) Install `batman-adv`
+```
+sudo apt-get update
+sudo apt-get install batctl bridge-utils
+sudo modprobe batman-adv
 ```
 
 3) Create a folder for iarc and enter it
@@ -79,6 +87,13 @@ sudo bash vm-batman-setup.sh
 
 If the Pis are runing you should see mesh neighbors including Pi 1 (169.254.97.1) and other nodes.
 
+You can also test the connection through:
+```
+ping 169.254.97.1
+```
+
+Note: If you are running a batman network alongside another, you will need to change your targeted drone network from drone 1. This is on line 13 of:  `vm-batman-setup.sh`
+
 ---
 
 ## Troubleshooting:
@@ -99,7 +114,7 @@ If the Pis are runing you should see mesh neighbors including Pi 1 (169.254.97.1
 
     This is a regulatory domain issue.Fix it by setting the regulatory domain before joining:
     ```
-    bashsudo iw reg set US
+    sudo iw reg set US
     sudo bash vm-batman-setup.sh
     ```
 
