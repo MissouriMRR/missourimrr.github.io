@@ -425,19 +425,19 @@ other_func1, other_func2, other_func3
 
 - Another optional section that provides information about the code
 - This section may include a discussion of the algorithm, calculations, mathematical equations in LaTeX format, and images
-- See [numpydoc Notes section reference](https://numpydoc.readthedocs.io/en/latest/format.html#Notes) for a more detailed explanation of how to incorporate code-like math expressions with LaTeX and images in the Notes
+- See [numpydoc Notes section reference](https://numpydoc.readthedocs.io/en/latest/format.html#notes) for a more detailed explanation of how to incorporate code-like math expressions with LaTeX and images in the Notes
 
 #### References Section
 
 - Optional section, also non-essential, but also part of numpydoc
 - A place for references from your Notes section
-- See [numpydoc References section reference](https://numpydoc.readthedocs.io/en/latest/format.html#References) for info and examples
+- See [numpydoc References section reference](https://numpydoc.readthedocs.io/en/latest/format.html#references) for info and examples
 
 #### Examples Section
 
 - Optional section, also non-essential, but also part of numpydoc
 - A place to put example usages of your function and the result
-- See [numpydoc Examples reference](https://numpydoc.readthedocs.io/en/latest/format.html#References) for more advanced things like doctest
+- See [numpydoc Examples reference](https://numpydoc.readthedocs.io/en/latest/format.html#references) for more advanced things like doctest
 
 
 ### Docstrings for Classes

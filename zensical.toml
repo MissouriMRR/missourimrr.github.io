@@ -1,117 +1,120 @@
 [project]
-site_url = "https://www.example.com/"
+site_url = "https://missourimrr.github.io/"
 site_name = "Multirotor Design Team"
 site_description = "Your project description"
 site_author = "Multirotor Design Team"
 
 copyright = "Copyright &copy; 2026 Multirotor Design Team"
 
-repo_url = "https://github.com/MissouriMRR/new-docs"
-repo_name = "MissouriMRR/new-docs"
-edit_uri = "edit/main/docs/"
+repo_url = "https://github.com/MissouriMRR"
+repo_name = "MissouriMRR"
+edit_uri = "missourimrr.github.io/edit/main/docs/"
 
 nav = [
-  { "Welcome" = "index.md" },
-  { "Markdown in 5min" = "markdown.md" },
-  { "Sample" = "test.md" },
-  { "Subteams" = [
-    { "App" = [
-      "subteams/app/app.md",
-      { "Cloudflare" = "subteams/app/compakt_info/cloudflare.md" },
-    ]},
-    { "Flight" = [
-      "subteams/flight/flight.md",
-      { "Installation Guide" = "subteams/flight/installation_guide/installation_guide.md" },
-      { "jMAVSim" = "subteams/flight/jMAVSim_info/jmavsim.md" },
-      { "Asynchronous" = "subteams/flight/asynchronous_info/asynchronous.md" },
-      { "Learning" = [
-        "subteams/flight/learning/learning.md",
-        { "Project 1: Takeoff and Land" = "subteams/flight/learning/project_one.md" },
-        { "Project 2: Move To" = "subteams/flight/learning/project_two.md" },
-        { "Project 3: Create a Shape" = "subteams/flight/learning/project_three.md" },
-      ]},
-    ]},
-    { "Interdrone" = [
-      "subteams/interdrone/index.md",
-      { "App Connection" = "subteams/interdrone/app_connection.md" },
-      { "Code" = "subteams/interdrone/code.md" },
-      { "Golden Image" = "subteams/interdrone/golden_image.md" },
-      { "Pifi (Pi 1 wifi access point)" = "subteams/interdrone/pifi.md" },
-      { "Virtual Machine" = "subteams/interdrone/virtual_machine.md" },
-    ]},
-    { "Simulation" = [
-      "subteams/simulation/simulation.md",
-      { "Installation" = [
-        "subteams/simulation/installation/simulation_install.md",
-        { "Linux" = "subteams/simulation/installation/simulation_install_linux.md" },
-        { "Windows" = "subteams/simulation/installation/simulation_install_windows.md" },
-        { "Pre-Configured Simulation Setup" = [
-          { "Simulation Install" = "subteams/simulation/installation/(Easy) Pre-Configured Simulation Setup/(0.) Simulation Install.md" },
-          { "Sample Drone Image Installation" = "subteams/simulation/installation/(Easy) Pre-Configured Simulation Setup/(1) Sample Drone Image Installation.md" },
-          { "Simulation Binary Configuration" = "subteams/simulation/installation/(Easy) Pre-Configured Simulation Setup/(2) Simulation Binary Configuration.md" },
-          { "Network Configuration" = "subteams/simulation/installation/(Easy) Pre-Configured Simulation Setup/(3) Network Configuration.md" },
-        ]},
-        { "Containers" = [
-          { "Installing and Configuring Containers" = "subteams/simulation/installation/docker/installing_docker.md" },
-          { "Publishing Container Images" = "subteams/simulation/installation/docker/publishing_containers.md" },
-        ]},
-      ]},
-      { "Flying the Virtual Drone with Code" = "subteams/simulation/flying.md" },
-      { "Simulation - Executable Setup Guide" = "subteams/simulation/non_sim_installation.md" },
-      { "Simulation Repository - Team Setup Guide" = "subteams/simulation/sim_dev_setup.md" },
-      { "Run Simulation from Raspberry Pi" = "subteams/simulation/raspberry_pi_sim.md" },
-      { "Cesium For Unreal" = "subteams/simulation/cesiumforunreal.md" },
-      { "Debugging Environment (Windows)" = "subteams/simulation/env_debug.md" },
-      { "RealityScan" = "subteams/simulation/realityscan.md" },
-      { "Satellite Data" = "subteams/simulation/satellite_data.md" },
-      { "Legacy" = [
-        "subteams/simulation/Legacy/simulation_installs_legacy.md",
-        { "Windows Install" = "subteams/simulation/Legacy/windows_install.md" },
-        { "Linux Install" = "subteams/simulation/Legacy/simulation_install_linux.md" },
-        { "Pre-Configured Simulation Setup" = [
-          { "Simulation Install" = "subteams/simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(0.) Simulation Install.md" },
-          { "Sample Drone Image Installation" = "subteams/simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(1) Sample Drone Image Installation.md" },
-          { "Simulation Binary Configuration" = "subteams/simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(2) Simulation Binary Configuration.md" },
-          { "Network Configuration" = "subteams/simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(3) Network Configuration.md" },
-        ]},
-        { "Debugging Environment (Windows)" = "subteams/simulation/Legacy/env_debug.md" },
-        { "Cesium For Unreal" = "subteams/simulation/Legacy/cesiumforunreal.md" },
-        { "Satellite Data" = "subteams/simulation/Legacy/satellite_data.md" },
-      ]},
-    ]},
-    { "Vision" = [
-      "subteams/vision/vision.md",
-      { "NumPy" = [
-        "subteams/vision/numpy/numpy.md",
-        { "Intro to NumPy" = "subteams/vision/numpy/tutorials/intro_to_numpy/intro_to_numpy.md" },
-        { "Monte Carlo Craps Simulation" = "subteams/vision/numpy/projects/monte_carlo.md" },
-      ]},
-      { "OpenCV" = [
-        "subteams/vision/opencv/opencv.md",
-        { "Tutorials" = [
-          { "Intro to Computer Vision Part 1" = "subteams/vision/opencv/tutorials/intro_to_compuer_vision/intro1.md" },
-          { "Intro to Computer Vision Part 2" = "subteams/vision/opencv/tutorials/intro_to_compuer_vision/intro2.md" },
-        ]},
-        { "Intro Projects" = [
-          { "Change Image Size" = "subteams/vision/opencv/intro_projects/image_size.md" },
-          { "Detect Edges of Planet" = "subteams/vision/opencv/intro_projects/planet_edges.md" },
-          { "Mario Bros" = "subteams/vision/opencv/intro_projects/mario.md" },
-          { "Make Tomatoes Blue" = "subteams/vision/opencv/intro_projects/blue_tomatoes.md" },
-          { "Chroma Key (Greenscreen)" = "subteams/vision/opencv/intro_projects/chroma_key.md" },
-        ]},
-        { "Advanced Projects" = [
-          { "Cleaning Up Images" = "subteams/vision/opencv/advanced_projects/image_cleanup.md" },
-          { "Image Skeletonization" = "subteams/vision/opencv/advanced_projects/skeletonization.md" },
-        ]},
-        { "Practice Problems" = [
-          { "NumPy and OpenCV Exercises" = "subteams/vision/opencv/practice_problems/np_cv_exercises.md" },
-        ]},
-      ]},
-      { "Pytesseract" = "subteams/vision/pytesseract/pytesseract.md" },
-      { "How to YOLO(v8)" = "subteams/vision/yolo_ml/yolo.md" },
+  {"Welcome!" = [
+    "index.md",
+    {"Editing the Docs" = [
+      { "Markdown Cheatsheet" = "markdown.md" }
+    ]}
+  ]},
+  { "Flight" = [
+    "flight/index.md",
+    { "Installation Guide" = "flight/installation_guide.md" },
+    { "jMAVSim" = "flight/jMAVSim_info/jmavsim.md" },
+    { "Asynchronous" = "flight/asynchronous_info/asynchronous.md" },
+    { "Learning" = [
+      "flight/learning/index.md",
+      { "Project 1: Takeoff and Land" = "flight/learning/project_one.md" },
+      { "Project 2: Move To" = "flight/learning/project_two.md" },
+      { "Project 3: Create a Shape" = "flight/learning/project_three.md" },
     ]},
   ]},
+  { "Interdrone" = [
+    "interdrone/index.md",
+    { "App Connection" = "interdrone/app_connection.md" },
+    { "Code" = "interdrone/code.md" },
+    { "Golden Image" = "interdrone/golden_image.md" },
+    { "Pifi (Pi 1 wifi access point)" = "interdrone/pifi.md" },
+    { "Virtual Machine" = "interdrone/virtual_machine.md" },
+  ]},
+  { "Simulation" = [
+    "simulation/index.md",
+    { "Installation" = [
+      "simulation/installation/index.md",
+      { "Linux" = "simulation/installation/linux.md" },
+      { "Windows" = "simulation/installation/windows.md" },
+      { "Pre-Configured Simulation Setup" = [
+        { "Simulation Install" = "simulation/installation/(Easy) Pre-Configured Simulation Setup/(0.) Simulation Install.md" },
+        { "Sample Drone Image Installation" = "simulation/installation/(Easy) Pre-Configured Simulation Setup/(1) Sample Drone Image Installation.md" },
+        { "Simulation Binary Configuration" = "simulation/installation/(Easy) Pre-Configured Simulation Setup/(2) Simulation Binary Configuration.md" },
+        { "Network Configuration" = "simulation/installation/(Easy) Pre-Configured Simulation Setup/(3) Network Configuration.md" },
+      ]},
+      { "Containers" = [
+        { "Installing and Configuring Containers" = "simulation/installation/docker/installing_docker.md" },
+        { "Publishing Container Images" = "simulation/installation/docker/publishing_containers.md" },
+      ]},
+    ]},
+    { "Flying the Virtual Drone with Code" = "simulation/flying.md" },
+    { "Simulation - Executable Setup Guide" = "simulation/non_sim_installation.md" },
+    { "Simulation Repository - Team Setup Guide" = "simulation/sim_dev_setup.md" },
+    { "Run Simulation from Raspberry Pi" = "simulation/raspberry_pi_sim.md" },
+    { "Cesium For Unreal" = "simulation/cesiumforunreal.md" },
+    { "Debugging Environment (Windows)" = "simulation/env_debug.md" },
+    { "RealityScan" = "simulation/realityscan.md" },
+    { "Satellite Data" = "simulation/satellite_data.md" },
+    { "Legacy" = [
+      { "Installation" = [
+          { "Legacy Installs" = "simulation/Legacy/simulation_installs_legacy.md"},
+          { "Windows Install" = "simulation/Legacy/windows_install.md" },
+          { "Linux Install" = "simulation/Legacy/simulation_install_linux.md" },
+          { "Pre-Configured Simulation Setup" = [
+            { "Simulation Install" = "simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(0.) Simulation Install.md" },
+            { "Sample Drone Image Installation" = "simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(1) Sample Drone Image Installation.md" },
+            { "Simulation Binary Configuration" = "simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(2) Simulation Binary Configuration.md" },
+            { "Network Configuration" = "simulation/Legacy/(Legacy) (Easy) Pre-Configured Simulation Setup/(3) Network Configuration.md" },
+          ]},
+      ]},
+      { "Debugging Environment (Windows)" = "simulation/Legacy/env_debug.md" },
+      { "Cesium For Unreal" = "simulation/Legacy/cesiumforunreal.md" },
+      { "Satellite Data" = "simulation/Legacy/satellite_data.md" },
+    ]},
+  ]},
+  { "Vision" = [
+    "vision/vision.md",
+    { "NumPy" = [
+      "vision/numpy/numpy.md",
+      { "Intro to NumPy" = "vision/numpy/tutorials/intro_to_numpy/intro_to_numpy.md" },
+      { "Monte Carlo Craps Simulation" = "vision/numpy/projects/monte_carlo.md" },
+    ]},
+    { "OpenCV" = [
+      "vision/opencv/opencv.md",
+      { "Tutorials" = [
+        { "Intro to Computer Vision Part 1" = "vision/opencv/tutorials/intro_to_compuer_vision/intro1.md" },
+        { "Intro to Computer Vision Part 2" = "vision/opencv/tutorials/intro_to_compuer_vision/intro2.md" },
+      ]},
+      { "Intro Projects" = [
+        { "Change Image Size" = "vision/opencv/intro_projects/image_size.md" },
+        { "Detect Edges of Planet" = "vision/opencv/intro_projects/planet_edges.md" },
+        { "Mario Bros" = "vision/opencv/intro_projects/mario.md" },
+        { "Make Tomatoes Blue" = "vision/opencv/intro_projects/blue_tomatoes.md" },
+        { "Chroma Key (Greenscreen)" = "vision/opencv/intro_projects/chroma_key.md" },
+      ]},
+      { "Advanced Projects" = [
+        { "Cleaning Up Images" = "vision/opencv/advanced_projects/image_cleanup.md" },
+        { "Image Skeletonization" = "vision/opencv/advanced_projects/skeletonization.md" },
+      ]},
+      { "Practice Problems" = [
+        { "NumPy and OpenCV Exercises" = "vision/opencv/practice_problems/np_cv_exercises.md" },
+      ]},
+    ]},
+    { "Pytesseract" = "vision/pytesseract/pytesseract.md" },
+    { "How to YOLO(v8)" = "vision/yolo_ml/yolo.md" },
+  ]},
   { "Technology" = [
+    { "App" = [
+      "technology/app/app.md",
+      { "Cloudflare" = "technology/app/compakt_info/cloudflare.md" },
+    ]},
     { "Flight Testing" = "technology/flight_testing/flight_testing.md" },
     { "Git" = "technology/git/git.md" },
     { "Python" = [
@@ -140,7 +143,7 @@ favicon = "assets/dark_favicon.png"
 language = "en"
 features = [
   "announce.dismiss",
-  # "content.action.edit",
+  "content.action.edit",
   # "content.action.view",
   "content.code.annotate",
   "content.code.copy",
@@ -154,11 +157,11 @@ features = [
   "navigation.indexes",
   "navigation.instant",
   "navigation.instant.prefetch",
-  # "navigation.instant.progress",
+  "navigation.instant.progress",
   "navigation.path",
   # "navigation.prune",
   "navigation.sections",
-  # "navigation.tabs",
+  "navigation.tabs",
   # "navigation.tabs.sticky",
   "navigation.top",
   "navigation.tracking",

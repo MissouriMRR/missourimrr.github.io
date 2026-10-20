@@ -16,3 +16,16 @@
 .md-header__button.md-logo img, .md-header__button.md-logo svg {
     height: 1.4rem;
 }
+
+body > div.md-container > nav {
+    line-height: 1.0;
+}
+
+.md-tabs__item {
+    /* links used for navigation tabs */
+    height: 2.0rem;
+}
+
+.md-tabs__link {
+    margin-top: .5rem;
+}

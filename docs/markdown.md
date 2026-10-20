@@ -2,7 +2,9 @@
 icon: simple/markdown
 ---
 
-# Markdown in 5min
+# Markdown Cheatsheet
+
+This markdown guide is taken from the [Zensical](https://zensical.org/) template project.
 
 ## Headers
 

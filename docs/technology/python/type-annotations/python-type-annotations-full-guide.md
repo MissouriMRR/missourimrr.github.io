@@ -265,7 +265,7 @@ def just_raise() -> NoReturn:
     raise RuntimeError("This function should never return")
 ```
 
-*See [Function Signatures](https://mypy.readthedocs.io/en/stable/getting_started.html#function-signatures-and-dynamic-vs-static-typing) from mypy docs for more info.*
+*See [Function Signatures](https://mypy.readthedocs.io/en/stable/getting_started.html#dynamic-vs-static-typing) from mypy docs for more info.*
 
 <br>
 
@@ -473,10 +473,10 @@ my_empl: Employee = Employee(name="John", age=30, salary=100000, allergies=["pea
 ## Numpy Arrays
 Numpy arrays are typed with the PyPI package [**nptyping**](https://pypi.org/project/nptyping/) (ver. 2.0.0+). This is so that we get explicit shape typing, and an overall cleaner annotation system. Unfortunately, this means that type checkers like mypy can't actually check the details of the typed numpy array (only whether the variable is or is not an ndarray), so at the moment, it's almost purely a glorified comment.
 
-Type annotations are formatted as `NDArray[S, T]` where `S` is the intended shape of the array ([see nptyping Shape expressions](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#Shape-expressions)), and `T` is the intended data type of the array ([see nptyping dtypes](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#dtypes)). Additionally, the structure of an array can also be annotated ([see nptyping Structure expressions](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#Structure-expressions)).
+Type annotations are formatted as `NDArray[S, T]` where `S` is the intended shape of the array ([see nptyping Shape expressions](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#shape-expressions)), and `T` is the intended data type of the array ([see nptyping dtypes](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#dtypes)). Additionally, the structure of an array can also be annotated ([see nptyping Structure expressions](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#structure-expressions)).
 
 ### Shape Typing
-Shapes are represented as strings containing a comma-separated list of integers corresponding to the shape of the ndarray. For example, a 2D array of shape (3, 4) would be represented as `"3, 4"`. In addition, shapes can also be more dynamically typed with wildcards (*) in place of single dimension numbers to represent any length for that dimension, and they can also be labeled and named. A full detailing of Shape expressions can be found [here](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#Shape-expressions).
+Shapes are represented as strings containing a comma-separated list of integers corresponding to the shape of the ndarray. For example, a 2D array of shape (3, 4) would be represented as `"3, 4"`. In addition, shapes can also be more dynamically typed with wildcards (*) in place of single dimension numbers to represent any length for that dimension, and they can also be labeled and named. A full detailing of Shape expressions can be found [here](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#shape-expressions).
 
 ### Data Type Typing
 Data types are imported from `nptyping` explicitly. Some commonly used types that can be imported are `Int`, `UInt8`, `Float`, `Bool`, `String`, and `Any`. A full list of available dtypes can be found [here](https://github.com/ramonhagenaars/nptyping/blob/master/USERDOCS.md#dtypes)
@@ -516,7 +516,7 @@ labeled_coords: NDArray[Shape["5 coordinates, [x, y] wgs84"], Float32] = ...  # 
 ## Other Advanced Types
 Here are a list of other advanced types that are not covered in the above sections with links to their type annotation documentation:
 - [attrs](https://mypy.readthedocs.io/en/stable/additional_features.html#the-attrs-package)
-- [TypedDicts](https://mypy.readthedocs.io/en/stable/more_types.html#typeddict)
+- [TypedDicts](https://mypy.readthedocs.io/en/stable/typed_dict.html#typeddict)
 - [Awaitables & Asynchronous Iterators/Generators](https://mypy.readthedocs.io/en/stable/more_types.html#typing-async-await)
 - [Protocols](https://mypy.readthedocs.io/en/stable/protocols.html)
 - [Final (Uninheritable) Attributes](https://mypy.readthedocs.io/en/stable/final_attrs.html)
