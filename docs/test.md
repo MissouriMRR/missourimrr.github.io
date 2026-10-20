@@ -157,7 +157,7 @@ $$
 
 ## Task Lists
 
-> Go to [documentation](https://zensical.org/docs/authoring/lists/#using-task-lists)
+> Go to [documentation](https://zensical.org/docs/authoring/lists/#use-task-lists)
 
 * [x] Install Zensical
 * [x] Configure `zensical.toml`
