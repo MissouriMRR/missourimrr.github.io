@@ -51,7 +51,7 @@ wsl # restart wsl
 #### More Information on Virtual Machines
 
 You can read more about virtual machines on
-[our page about virtual machines](../technology/virtual_machines/virtual_machines.md).
+[our page about virtual machines](../technology/virtual_machines).
 
 ### Step 2: Installing Git
 

@@ -15,7 +15,7 @@
 - It’s design emphasises readability
 - See [The Zen of Python](https://peps.python.org/pep-0020/)
 
-To get install Python and set up your environment, check out [Setting up your Environment](../set_up/set_up.md).
+To get install Python and set up your environment, check out [Setting up your Environment](../set_up.md).
 
 ## Running Python Code
 
@@ -271,7 +271,7 @@ while number > 5:
 
 ## Functions
 
-Functions in Python are defined using the `def` keyword and can be defined with any number of parameters. However, since Python has dynamic typing, the type of the parameter cannot be enforced without adding additional statements to check. You can, though, use [type hints](../type-annotations/python-type-annotations-full-guide.md) to specify what kind of input a function expects.
+Functions in Python are defined using the `def` keyword and can be defined with any number of parameters. However, since Python has dynamic typing, the type of the parameter cannot be enforced without adding additional statements to check. You can, though, use [type hints](../type_annotations) to specify what kind of input a function expects.
 
 ```python
 def func1():

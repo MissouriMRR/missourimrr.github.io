@@ -4,7 +4,7 @@
 
 [Download Images](https://www.kaggle.com/code/cameronfalls/intro-to-computer-vision-2/data)
 
-[More info on IPython Notebooks](../../../../technology/python/ipython_notebooks/ipython_notebooks.md)
+[More info on IPython Notebooks](../../../../technology/python/ipython_notebooks.md)
 
 Need a refresher on NumPy? [Check out the Intro to NumPy tutorial.](../../../numpy/tutorials/intro_to_numpy/intro_to_numpy.md)
 

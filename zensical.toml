@@ -1,7 +1,7 @@
 [project]
 site_url = "https://missourimrr.github.io/"
 site_name = "Multirotor Design Team"
-site_description = "Your project description"
+site_description = "Documentation website for the Missouri S&T Multirotor Design Team"
 site_author = "Multirotor Design Team"
 
 copyright = "Copyright &copy; 2026 Multirotor Design Team"
@@ -11,12 +11,7 @@ repo_name = "MissouriMRR"
 edit_uri = "missourimrr.github.io/edit/main/docs/"
 
 nav = [
-  {"Welcome!" = [
-    "index.md",
-    {"Editing the Docs" = [
-      { "Markdown Cheatsheet" = "markdown.md" }
-    ]}
-  ]},
+  {"Multirotor" = "index.md"},
   { "Flight" = [
     "flight/index.md",
     { "Installation Guide" = "flight/installation_guide.md" },
@@ -80,7 +75,7 @@ nav = [
     ]},
   ]},
   { "Vision" = [
-    "vision/vision.md",
+    "vision/index.md",
     { "NumPy" = [
       "vision/numpy/numpy.md",
       { "Intro to NumPy" = "vision/numpy/tutorials/intro_to_numpy/intro_to_numpy.md" },
@@ -111,25 +106,30 @@ nav = [
     { "How to YOLO(v8)" = "vision/yolo_ml/yolo.md" },
   ]},
   { "Technology" = [
+    "technology/index.md",
     { "App" = [
-      "technology/app/app.md",
-      { "Cloudflare" = "technology/app/compakt_info/cloudflare.md" },
+      "technology/app/index.md",
+      { "Cloudflare" = "technology/app/cloudflare.md" },
     ]},
-    { "Flight Testing" = "technology/flight_testing/flight_testing.md" },
-    { "Git" = "technology/git/git.md" },
+    { "Flight Testing" = "technology/flight_testing.md" },
+    { "Git" = "technology/git.md" },
     { "Python" = [
-      "technology/python/python.md",
-      { "Setting Up Your Environment" = "technology/python/set_up/set_up.md" },
+      "technology/python/index.md",
+      { "Setting Up Your Environment" = "technology/python/set_up.md" },
       { "Intro" = [
-        "technology/python/intro/intro.md",
-        { "Python Intro" = "technology/python/intro/intro_tutorial.md" },
+        "technology/python/intro/index.md",
+        { "Tutorial" = "technology/python/intro/tutorial.md" },
       ]},
-      { "IPython Notebooks" = "technology/python/ipython_notebooks/ipython_notebooks.md" },
-      { "Documentation and Docstrings" = "technology/python/docstrings/docstrings.md" },
-      { "Type Annotations" = "technology/python/type-annotations/python-type-annotations-full-guide.md" },
+      { "IPython Notebooks" = "technology/python/ipython_notebooks.md" },
+      { "Documentation and Docstrings" = "technology/python/docstrings.md" },
+      { "Type Annotations" = "technology/python/type_annotations.md" },
     ]},
-    { "Virtual Machines" = "technology/virtual_machines/virtual_machines.md" },
-    { "WSL" = "technology/wsl/wsl.md" },
+    { "Virtual Machines" = "technology/virtual_machines.md" },
+    { "WSL" = "technology/wsl.md" },
+    { "Zensical" = [
+      "technology/zensical/index.md",
+      { "Markdown" = "technology/zensical/markdown.md" },
+    ]},
   ]},
 ]
 

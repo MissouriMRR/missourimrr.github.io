@@ -2,9 +2,11 @@
 icon: lucide/house
 ---
 
-# Missouri S&T Multirotor Design Team Docs
+# Missouri S&T Multirotor Design Team
 
-Welcome to the Multirotor Design Team's documentation team! Here, you will find documentation and tutorials relating to the team, including software, firmware, and hardware.
+Welcome to the Multirotor Design Team's documentation website! Here, you will find documentation and tutorials relating to the team, including software, firmware, and hardware.
+
+[Looking for the team's general website, which contains more information about the team's competitions and it's projects?](https://multirotor.mst.edu/)
 
 ![Sparrow during a mission flight](assets/sparrow_midair.png)
 
@@ -14,10 +16,10 @@ Our team has multiple different subteams that focus on different parts of the so
 
 **Software**
 
-- [Flight](flight/index.md) - Physical movement of the drone and control of sensors that allow for complex and consistent mission flights
-- [Vision](vision/vision.md) - Creating vision models that allow for autonomous detection and localization of objects in various environments
-- [Simulation](simulation/index.md) - Producing simulated environments that match identically to our true competition environments
-- [Interdrone](interdrone/index.md) - Allowing for communication and coordination between multiple drones
+- [Flight](flight) - Physical movement of the drone and control of sensors that allow for complex and consistent mission flights
+- [Vision](vision) - Creating vision models that allow for autonomous detection and localization of objects in various environments
+- [Simulation](simulation) - Producing simulated environments that match identically to our true competition environments
+- [Interdrone](interdrone) - Allowing for communication and coordination between multiple drones
 
 **Hardware** - Design and construction of all of our competition drones, including both mechanical and electrical scopes
 
@@ -25,12 +27,12 @@ Our team has multiple different subteams that focus on different parts of the so
 
 ## Tools and Technologies
 
-- [Python](technology/python/python.md)
-- [Git](technology/git/git.md)
-- [Virtual Machines](technology/virtual_machines/virtual_machines.md)
-- [Windows Subsystem for Linux (WSL)](technology/wsl/wsl.md)
-- [Flight Testing](technology/flight_testing/flight_testing.md)
-- [Apps](technology/app/app.md)
+- [Python](technology/python)
+- [Git](technology/git)
+- [Virtual Machines](technology/virtual_machines)
+- [Windows Subsystem for Linux (WSL)](technology/wsl)
+- [Flight Testing](technology/flight_testing)
+- [Apps](technology/app)
 
 ## Competition Codebases
 - [IARC-10 (2026-27)](https://github.com/MissouriMRR/IARC-10)
@@ -43,3 +45,7 @@ Our team has multiple different subteams that focus on different parts of the so
 - [IARC-2018](https://github.com/MissouriMRR/IARC-2018)
 - [DroneKit (2016-17)](https://github.com/MissouriMRR/DroneKit)
 - [Panic (2016)](https://github.com/MissouriMRR/Panic)
+
+## Editing this Documentation
+
+This website was built using [Zensical](technology/zensical), and the source code is hosted on the team's [GitHub repository](https://github.com/MissouriMRR/missourimrr.github.io). Want to modify existing pages or add new pages? See the [Zensical section](technology/zensical).

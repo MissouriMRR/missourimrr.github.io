@@ -9,15 +9,14 @@ The primary programming language used by the software team is Python. Here you w
 <br>
 
 ## Getting Started
-* [Setting up your Environmnet](set_up/set_up.md)
-* [Intro to Python](intro/intro.md)
+* [Setting up your Environmnet](set_up)
+* [Intro to Python](intro)
 
 ## Writing Good Code
 * [Python PEP 8 Style Guide (by Python)](https://pep8.org/)
-* [Python Type Annotations - Full Guide](type-annotations/python-type-annotations-full-guide.md)
-* [Documentation and Docstrings](docstrings/docstrings.md)
+* [Python Type Annotations - Full Guide](type_annotations.md)
+* [Documentation and Docstrings](docstrings)
 
 
 ## Tools
-* [IPython Notebooks](ipython_notebooks/ipython_notebooks.md)
-
+* [IPython Notebooks](ipython_notebooks)

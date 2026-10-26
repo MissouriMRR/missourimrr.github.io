@@ -2,7 +2,7 @@
 
 [Download Tutorial as IPython Notebook](intro-to-numpy.ipynb)
 
-[More info on IPython Notebooks](../../../../technology/python/ipython_notebooks/ipython_notebooks.md)
+[More info on IPython Notebooks](../../../../technology/python/ipython_notebooks.md)
 
 ## Table of Contents
 

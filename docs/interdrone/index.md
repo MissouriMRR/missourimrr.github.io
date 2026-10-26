@@ -1,3 +1,7 @@
+---
+icon: lucide/drone
+---
+
 # Interdrone Docs
 
 Here you will find all the documentation related to the interdrone-communication subteam of 
@@ -17,7 +21,7 @@ As the interdrone communication team, we are directly responsible for ensuring a
 # Technologies we Use
 Interdrone-Communication utilizes Raspberry Pi 02W's, implements a B.A.T.M.A.N mesh network, and is all coded in python. For further information on how to use each of these technoligies, click on the links below
 -  [RaspberryPi02W](https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-product-brief.pdf)
--  [Python](../technology/python/python.md)
+-  [Python](../technology/python)
 -  [B.A.T.M.A.N](https://www.open-mesh.org/doc/batman-adv/Quick-start-guide.html)
 
 
@@ -29,5 +33,3 @@ Interdrone-Communication utilizes Raspberry Pi 02W's, implements a B.A.T.M.A.N m
 -   [SUAS-2023](https://github.com/MissouriMRR/SUAS-2023/)
 -   [SUAS-2022](https://github.com/MissouriMRR/SUAS-2022/)
 -   [SUAS-2025](https://github.com/MissouriMRR/SUAS-2025/)
-
-
