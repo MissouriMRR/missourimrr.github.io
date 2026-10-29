@@ -105,6 +105,10 @@ nav = [
     { "Pytesseract" = "vision/pytesseract/pytesseract.md" },
     { "How to YOLO(v8)" = "vision/yolo_ml/yolo.md" },
   ]},
+  { "Lightshow" = [
+    "lightshow/index.md",
+    { "Installation" = "lightshow/installation/install.md"}
+  ]},
   { "Technology" = [
     "technology/index.md",
     { "App" = [
