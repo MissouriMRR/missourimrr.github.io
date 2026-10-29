@@ -107,7 +107,8 @@ nav = [
   ]},
   { "Lightshow" = [
     "lightshow/index.md",
-    { "Installation" = "lightshow/installation/install.md"}
+    { "Installation" = "lightshow/installation/install.md"},
+    { "Lightshow Walkthrough" = "lightshow/walkthrough.md"}
   ]},
   { "Technology" = [
     "technology/index.md",
