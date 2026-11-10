@@ -108,7 +108,8 @@ nav = [
   { "Lightshow" = [
     "lightshow/index.md",
     { "Installation" = "lightshow/installation/install.md"},
-    { "Lightshow Walkthrough" = "lightshow/walkthrough.md"}
+    { "Lightshow Walkthrough" = "lightshow/walkthrough.md"},
+    { "Importing from Skybrush" = "lightshow/skybrush.md"},
   ]},
   { "Technology" = [
     "technology/index.md",
