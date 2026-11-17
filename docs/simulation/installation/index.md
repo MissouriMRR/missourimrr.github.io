@@ -1,8 +1,8 @@
 # Simulator Installations
 
-## [Installation for Windows](windows.md)
+## [Windows Install](windows.md)
 ### Only works on Windows 11 right now
-## [Installation for Linux](linux.md)
+## [Linux Install](linux.md)
 ### **NOTE**: Linux is still a WIP
 ## MacOS: Incompatible
 
